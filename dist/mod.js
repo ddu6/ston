@@ -84,8 +84,9 @@ function splitToArray(string, keepKey = false) {
             }
             continue;
         }
-        if (count > 0)
+        if (count > 0) {
             continue;
+        }
         if (char === ',' || char === '\n') {
             const tmp = string.slice(last, i).trim();
             last = i + 1;
@@ -94,8 +95,9 @@ function splitToArray(string, keepKey = false) {
             }
             continue;
         }
-        if (last < i)
+        if (last < i) {
             continue;
+        }
         if (char.trim() === '') {
             last = i + 1;
             continue;
@@ -128,8 +130,9 @@ function tempArrayToSTONArray(array) {
     const out = [];
     for (let i = 0; i < array.length; i++) {
         const ston = parse(array[i]);
-        if (ston === undefined)
+        if (ston === undefined) {
             return undefined;
+        }
         out.push(ston);
     }
     return out;
@@ -141,8 +144,9 @@ function tempArrayToSTONObject(array) {
         const result = string.match(/^\w[\w-]*/);
         if (result === null) {
             const ston = parse(string);
-            if (ston === undefined)
+            if (ston === undefined) {
                 return undefined;
+            }
             out.__ = ston;
             continue;
         }
@@ -156,8 +160,9 @@ function tempArrayToSTONObject(array) {
         }
         else {
             const value = parse(valStr);
-            if (value === undefined)
+            if (value === undefined) {
                 return undefined;
+            }
             out[key] = value;
         }
     }
@@ -170,8 +175,9 @@ function parseToString(string) {
         const char = string[i];
         if (escape === true) {
             escape = false;
-            if (char !== '\\' && char !== "'")
+            if (char !== '\\' && char !== "'") {
                 array.push('\\');
+            }
             array.push(char);
             continue;
         }
@@ -179,8 +185,9 @@ function parseToString(string) {
             escape = true;
             continue;
         }
-        if (char === "'")
+        if (char === "'") {
             break;
+        }
         array.push(char);
     }
     return array.join('');
@@ -193,20 +200,26 @@ function parseToObject(string) {
 }
 function parse(string) {
     string = string.trimStart();
-    if (string === '')
+    if (string === '') {
         return undefined;
+    }
     const start = string[0];
-    if (start === "'")
+    if (start === "'") {
         return parseToString(string.slice(1));
-    if (start === '[')
+    }
+    if (start === '[') {
         return parseToArray(string.slice(1));
-    if (start === '{')
+    }
+    if (start === '{') {
         return parseToObject(string.slice(1));
+    }
     string = string.trimEnd();
-    if (string === 'true')
+    if (string === 'true') {
         return true;
-    if (string === 'false')
+    }
+    if (string === 'false') {
         return false;
+    }
     if (/^(?:[+-]?Infinity|NaN|0x[\da-fA-F]+|0o[0-7]+|0b[01]+|[+-]?(?:\d*\.?\d+|\d+\.)(?:e[+-]?\d+)?)$/.test(string)) {
         return Number(string);
     }
@@ -256,8 +269,9 @@ function stringifyObject(object, beautify, level = 1) {
     for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
         const result = key.match(/^\w[\w-]*$/);
-        if (result === null)
+        if (result === null) {
             continue;
+        }
         const value = object[key];
         const string = stringify(value, beautify, level + (expand ? 1 : 0));
         if (string.startsWith('\'') || string.startsWith('[') || string.startsWith('{')) {
@@ -293,16 +307,24 @@ function stringifyObject(object, beautify, level = 1) {
     }
 }
 function stringify(ston, beautify = 'none', level = 1) {
-    if (typeof ston === 'number')
+    if (ston === undefined) {
+        return '';
+    }
+    if (typeof ston === 'number') {
         return ston.toString();
-    if (typeof ston === 'string')
+    }
+    if (typeof ston === 'string') {
         return stringifyString(ston);
-    if (ston === true)
+    }
+    if (ston === true) {
         return 'true';
-    if (ston === false)
+    }
+    if (ston === false) {
         return 'false';
-    if (Array.isArray(ston))
+    }
+    if (Array.isArray(ston)) {
         return stringifyArray(ston, beautify, level);
+    }
     return stringifyObject(ston, beautify, level);
 }
 exports.stringify = stringify;

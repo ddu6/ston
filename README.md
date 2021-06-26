@@ -10,7 +10,7 @@ console.log(ston.stringify(ston.parse(`{
     - str val can not be quoted with double quotes
     */
     unquoted-str is supported
-}`)))
+}`),'all'))
 console.log(ston.stringify(ston.parse(`[
     -Infinity
     +2e-3
@@ -21,7 +21,11 @@ console.log(ston.stringify(ston.parse(`[
 ]`)))
 
 /* output
-{standalone-key,'default key'unquoted-str'is supported'}
+{
+    standalone-key
+    'default key'
+    unquoted-str'is supported'
+}
 [-Infinity,0.002,0.5,255,3,54]
 */
 ```

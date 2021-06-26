@@ -2,7 +2,7 @@ export type STONObject={
     [key:string]:(STONObject|STONArray|string|number|boolean)
 }
 export type STONArray=(STONObject|STONArray|string|number|boolean)[]
-function splitToArray(string:string,keepKey=false):string[]{
+function splitToArray(string:string,keepKey=false){
     let count=0
     let quote=false
     let escape=false
@@ -85,7 +85,9 @@ function splitToArray(string:string,keepKey=false):string[]{
             }
             continue
         }
-        if(count>0)continue
+        if(count>0){
+            continue
+        }
         if(char===','||char==='\n'){
             const tmp=string.slice(last,i).trim()
             last=i+1
@@ -94,7 +96,9 @@ function splitToArray(string:string,keepKey=false):string[]{
             }
             continue
         }
-        if(last<i)continue
+        if(last<i){
+            continue
+        }
         if(char.trim()===''){
             last=i+1
             continue
@@ -127,7 +131,9 @@ function tempArrayToSTONArray(array:string[]){
     const out:STONArray=[]
     for(let i=0;i<array.length;i++){
         const ston=parse(array[i])
-        if(ston===undefined)return undefined
+        if(ston===undefined){
+            return undefined
+        }
         out.push(ston)
     }
     return out
@@ -139,7 +145,9 @@ function tempArrayToSTONObject(array:string[]){
         const result=string.match(/^\w[\w-]*/)
         if(result===null){
             const ston=parse(string)
-            if(ston===undefined)return undefined
+            if(ston===undefined){
+                return undefined
+            }
             out.__=ston
             continue
         }
@@ -152,20 +160,24 @@ function tempArrayToSTONObject(array:string[]){
             out[key]=true
         }else{
             const value=parse(valStr)
-            if(value===undefined)return undefined
+            if(value===undefined){
+                return undefined
+            }
             out[key]=value
         }
     }
     return out
 }
-function parseToString(string:string):string{
+function parseToString(string:string){
     const array:string[]=[]
     let escape:boolean=false
     for(let i=0;i<string.length;i++){
         const char=string[i]
         if(escape===true){
             escape=false
-            if(char!=='\\'&&char!=="'")array.push('\\')
+            if(char!=='\\'&&char!=="'"){
+                array.push('\\')
+            }
             array.push(char)
             continue
         }
@@ -173,7 +185,9 @@ function parseToString(string:string):string{
             escape=true
             continue
         }
-        if(char==="'")break
+        if(char==="'"){
+            break
+        }
         array.push(char)
     }
     return array.join('')
@@ -186,14 +200,26 @@ function parseToObject(string:string){
 }
 export function parse(string:string):STONObject|STONArray|string|number|boolean|undefined{
     string=string.trimStart()
-    if(string==='')return undefined
+    if(string===''){
+        return undefined
+    }
     const start=string[0]
-    if(start==="'")return parseToString(string.slice(1))
-    if(start==='[')return parseToArray(string.slice(1))
-    if(start==='{')return parseToObject(string.slice(1))
+    if(start==="'"){
+        return parseToString(string.slice(1))
+    }
+    if(start==='['){
+        return parseToArray(string.slice(1))
+    }
+    if(start==='{'){
+        return parseToObject(string.slice(1))
+    }
     string=string.trimEnd()
-    if(string==='true')return true
-    if(string==='false')return false
+    if(string==='true'){
+        return true
+    }
+    if(string==='false'){
+        return false
+    }
     if(/^(?:[+-]?Infinity|NaN|0x[\da-fA-F]+|0o[0-7]+|0b[01]+|[+-]?(?:\d*\.?\d+|\d+\.)(?:e[+-]?\d+)?)$/.test(string)){
         return Number(string)
     }
@@ -202,11 +228,11 @@ export function parse(string:string):STONObject|STONArray|string|number|boolean|
     }
     return string
 }
-function stringifyString(string:string):string{
+function stringifyString(string:string){
     return "'"+string.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/(^|[^\\])\\\\(?=[^\\"'])/g,'$1\\')+"'"
 }
 type BeautifyTarget='array'|'object'|'all'|'none'|'arrayInObject'|'arrayInObjectAndThis'
-function stringifyArray(array:STONArray,beautify:BeautifyTarget,level=1):string{
+function stringifyArray(array:STONArray,beautify:BeautifyTarget,level=1){
     const out:string[]=[]
     const expand=array.length>1&&(beautify==='all'||beautify==='array'||beautify==='arrayInObjectAndThis')
     if(beautify==='arrayInObjectAndThis'){
@@ -233,7 +259,7 @@ function stringifyArray(array:STONArray,beautify:BeautifyTarget,level=1):string{
         return '['+out.join('')+']'
     }
 }
-function stringifyObject(object:STONObject,beautify:BeautifyTarget,level=1):string{
+function stringifyObject(object:STONObject,beautify:BeautifyTarget,level=1){
     const out:string[]=[]
     const keys=Object.keys(object)
     const expand=keys.length>1&&(beautify==='all'||beautify==='object')
@@ -243,7 +269,9 @@ function stringifyObject(object:STONObject,beautify:BeautifyTarget,level=1):stri
     for(let i=0;i<keys.length;i++){
         const key=keys[i]
         const result=key.match(/^\w[\w-]*$/)
-        if(result===null)continue
+        if(result===null){
+            continue
+        }
         const value=object[key]
         const string=stringify(value,beautify,level+(expand?1:0))
         if(string.startsWith('\'')||string.startsWith('[')||string.startsWith('{')){
@@ -275,11 +303,24 @@ function stringifyObject(object:STONObject,beautify:BeautifyTarget,level=1):stri
         return '{'+out.join('')+'}'
     }
 }
-export function stringify(ston:STONObject|STONArray|string|number|boolean,beautify:BeautifyTarget='none',level=1){
-    if(typeof ston==='number')return ston.toString()
-    if(typeof ston==='string')return stringifyString(ston)
-    if(ston===true)return 'true'
-    if(ston===false)return 'false'
-    if(Array.isArray(ston))return stringifyArray(ston,beautify,level)
+export function stringify(ston:STONObject|STONArray|string|number|boolean|undefined,beautify:BeautifyTarget='none',level=1){
+    if(ston===undefined){
+        return ''
+    }
+    if(typeof ston==='number'){
+        return ston.toString()
+    }
+    if(typeof ston==='string'){
+        return stringifyString(ston)
+    }
+    if(ston===true){
+        return 'true'
+    }
+    if(ston===false){
+        return 'false'
+    }
+    if(Array.isArray(ston)){
+        return stringifyArray(ston,beautify,level)
+    }
     return stringifyObject(ston,beautify,level)
 }
