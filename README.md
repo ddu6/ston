@@ -1,4 +1,4 @@
-# Simple Text Object Notation
+# STON
 ```js
 const ston=require('ston')
 console.log(ston.stringify(ston.parse(`{

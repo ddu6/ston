@@ -1,7 +1,7 @@
 {
   "name": "ston",
   "version": "0.0.1",
-  "description": "",
+  "description": "Simple Text Object Notation",
   "main": "dist/mod.js",
   "scripts": {
     "test": "node test/main.js"
