@@ -4,7 +4,7 @@ console.log(ston.stringify(ston.parse(`{
     // default val is true
     'default key' // is __
     /*
-    - key must match \\w[\\w-]* and should not be quoted
+    - key must match [a-zA-Z_-]+ and should not be quoted
     - str val can not be quoted with double quotes
     */
     unquoted-str is supported

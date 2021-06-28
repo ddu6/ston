@@ -141,7 +141,7 @@ function tempArrayToSTONObject(array) {
     const out = {};
     for (let i = 0; i < array.length; i++) {
         const string = array[i].trimStart();
-        const result = string.match(/^\w[\w-]*/);
+        const result = string.match(/^[\w-]+/);
         if (result === null) {
             const ston = parse(string);
             if (ston === undefined) {
@@ -152,9 +152,6 @@ function tempArrayToSTONObject(array) {
         }
         const key = result[0];
         let valStr = string.slice(key.length).trimStart();
-        if (valStr.startsWith(':')) {
-            valStr = valStr.slice(1).trimStart();
-        }
         if (valStr === '') {
             out[key] = true;
         }
@@ -232,15 +229,15 @@ exports.parse = parse;
 function stringifyString(string) {
     return "'" + string.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/(^|[^\\])\\\\(?=[^\\"'])/g, '$1\\') + "'";
 }
-function stringifyArray(array, beautify, level = 1) {
+function stringifyArray(array, beautify, addComma, level = 1) {
     const out = [];
     const expand = array.length > 1 && (beautify === 'all' || beautify === 'array' || beautify === 'arrayInObjectAndThis');
     if (beautify === 'arrayInObjectAndThis') {
         beautify = 'arrayInObject';
     }
     for (let i = 0; i < array.length; i++) {
-        const string = stringify(array[i], beautify, level + (expand ? 1 : 0));
-        if (string.endsWith("'") || string.endsWith('}') || string.endsWith(']')
+        const string = stringify(array[i], beautify, addComma, level + (expand ? 1 : 0));
+        if ((string.endsWith("'") || string.endsWith('}') || string.endsWith(']')) && addComma !== 'always'
             || i === (array.length - 1) || expand) {
             out.push(string);
         }
@@ -259,7 +256,7 @@ function stringifyArray(array, beautify, level = 1) {
         return '[' + out.join('') + ']';
     }
 }
-function stringifyObject(object, beautify, level = 1) {
+function stringifyObject(object, beautify, addComma, level = 1) {
     const out = [];
     const keys = Object.keys(object);
     const expand = keys.length > 1 && (beautify === 'all' || beautify === 'object');
@@ -268,14 +265,19 @@ function stringifyObject(object, beautify, level = 1) {
     }
     for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
-        const result = key.match(/^\w[\w-]*$/);
+        const result = key.match(/^[\w-]+$/);
         if (result === null) {
             continue;
         }
         const value = object[key];
-        const string = stringify(value, beautify, level + (expand ? 1 : 0));
-        if (string.startsWith('\'') || string.startsWith('[') || string.startsWith('{')) {
-            out.push((key === '__' ? '' : key) + string);
+        const string = stringify(value, beautify, addComma, level + (expand ? 1 : 0));
+        if (string.startsWith("'") || string.startsWith('[') || string.startsWith('{')) {
+            if (addComma !== 'always' && addComma !== 'inObject' || i === (keys.length - 1) || expand) {
+                out.push((key === '__' ? '' : key) + string);
+            }
+            else {
+                out.push((key === '__' ? '' : key) + string + ',');
+            }
         }
         else if (string === 'true') {
             if (i === (keys.length - 1) || expand) {
@@ -286,8 +288,7 @@ function stringifyObject(object, beautify, level = 1) {
             }
         }
         else {
-            if (string.endsWith("'") || string.endsWith('}') || string.endsWith(']')
-                || i === (keys.length - 1) || expand) {
+            if (i === (keys.length - 1) || expand) {
                 out.push(key + ' ' + string);
             }
             else {
@@ -306,7 +307,7 @@ function stringifyObject(object, beautify, level = 1) {
         return '{' + out.join('') + '}';
     }
 }
-function stringify(ston, beautify = 'none', level = 1) {
+function stringify(ston, beautify = 'none', addComma = 'auto', level = 1) {
     if (ston === undefined) {
         return '';
     }
@@ -323,8 +324,8 @@ function stringify(ston, beautify = 'none', level = 1) {
         return 'false';
     }
     if (Array.isArray(ston)) {
-        return stringifyArray(ston, beautify, level);
+        return stringifyArray(ston, beautify, addComma, level);
     }
-    return stringifyObject(ston, beautify, level);
+    return stringifyObject(ston, beautify, addComma, level);
 }
 exports.stringify = stringify;

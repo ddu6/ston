@@ -142,7 +142,7 @@ function tempArrayToSTONObject(array:string[]){
     const out:STONObject={}
     for(let i=0;i<array.length;i++){
         const string=array[i].trimStart()
-        const result=string.match(/^\w[\w-]*/)
+        const result=string.match(/^[\w-]+/)
         if(result===null){
             const ston=parse(string)
             if(ston===undefined){
@@ -153,9 +153,6 @@ function tempArrayToSTONObject(array:string[]){
         }
         const key=result[0]
         let valStr=string.slice(key.length).trimStart()
-        if(valStr.startsWith(':')){
-            valStr=valStr.slice(1).trimStart()
-        }
         if(valStr===''){
             out[key]=true
         }else{
@@ -231,17 +228,18 @@ export function parse(string:string):STONObject|STONArray|string|number|boolean|
 function stringifyString(string:string){
     return "'"+string.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/(^|[^\\])\\\\(?=[^\\"'])/g,'$1\\')+"'"
 }
-type BeautifyTarget='array'|'object'|'all'|'none'|'arrayInObject'|'arrayInObjectAndThis'
-function stringifyArray(array:STONArray,beautify:BeautifyTarget,level=1){
+type BeautifyTarget='none'|'all'|'array'|'object'|'arrayInObject'|'arrayInObjectAndThis'
+type AddComma='auto'|'always'|'inObject'
+function stringifyArray(array:STONArray,beautify:BeautifyTarget,addComma:AddComma,level=1){
     const out:string[]=[]
     const expand=array.length>1&&(beautify==='all'||beautify==='array'||beautify==='arrayInObjectAndThis')
     if(beautify==='arrayInObjectAndThis'){
         beautify='arrayInObject'
     }
     for(let i=0;i<array.length;i++){
-        const string=stringify(array[i],beautify,level+(expand?1:0))
+        const string=stringify(array[i],beautify,addComma,level+(expand?1:0))
         if(
-            string.endsWith("'")||string.endsWith('}')||string.endsWith(']')
+            (string.endsWith("'")||string.endsWith('}')||string.endsWith(']'))&&addComma!=='always'
             ||i===(array.length-1)||expand
         ){
             out.push(string)
@@ -259,7 +257,7 @@ function stringifyArray(array:STONArray,beautify:BeautifyTarget,level=1){
         return '['+out.join('')+']'
     }
 }
-function stringifyObject(object:STONObject,beautify:BeautifyTarget,level=1){
+function stringifyObject(object:STONObject,beautify:BeautifyTarget,addComma:AddComma,level=1){
     const out:string[]=[]
     const keys=Object.keys(object)
     const expand=keys.length>1&&(beautify==='all'||beautify==='object')
@@ -268,14 +266,18 @@ function stringifyObject(object:STONObject,beautify:BeautifyTarget,level=1){
     }
     for(let i=0;i<keys.length;i++){
         const key=keys[i]
-        const result=key.match(/^\w[\w-]*$/)
+        const result=key.match(/^[\w-]+$/)
         if(result===null){
             continue
         }
         const value=object[key]
-        const string=stringify(value,beautify,level+(expand?1:0))
-        if(string.startsWith('\'')||string.startsWith('[')||string.startsWith('{')){
-            out.push((key==='__'?'':key)+string)
+        const string=stringify(value,beautify,addComma,level+(expand?1:0))
+        if(string.startsWith("'")||string.startsWith('[')||string.startsWith('{')){
+            if(addComma!=='always'&&addComma!=='inObject'||i===(keys.length-1)||expand){
+                out.push((key==='__'?'':key)+string)
+            }else{
+                out.push((key==='__'?'':key)+string+',')
+            }
         }else if(string==='true'){
             if(i===(keys.length-1)||expand){
                 out.push(key)
@@ -283,10 +285,7 @@ function stringifyObject(object:STONObject,beautify:BeautifyTarget,level=1){
                 out.push(key+',')
             }
         }else{
-            if(
-                string.endsWith("'")||string.endsWith('}')||string.endsWith(']')
-                ||i===(keys.length-1)||expand
-            ){
+            if(i===(keys.length-1)||expand){
                 out.push(key+' '+string)
             }else{
                 out.push(key+' '+string+',')
@@ -303,7 +302,7 @@ function stringifyObject(object:STONObject,beautify:BeautifyTarget,level=1){
         return '{'+out.join('')+'}'
     }
 }
-export function stringify(ston:STONObject|STONArray|string|number|boolean|undefined,beautify:BeautifyTarget='none',level=1){
+export function stringify(ston:STONObject|STONArray|string|number|boolean|undefined,beautify:BeautifyTarget='none',addComma:AddComma='auto',level=1){
     if(ston===undefined){
         return ''
     }
@@ -320,7 +319,7 @@ export function stringify(ston:STONObject|STONArray|string|number|boolean|undefi
         return 'false'
     }
     if(Array.isArray(ston)){
-        return stringifyArray(ston,beautify,level)
+        return stringifyArray(ston,beautify,addComma,level)
     }
-    return stringifyObject(ston,beautify,level)
+    return stringifyObject(ston,beautify,addComma,level)
 }
