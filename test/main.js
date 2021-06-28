@@ -8,7 +8,7 @@ console.log(ston.stringify(ston.parse(`{
     - str val can not be quoted with double quotes
     */
     unquoted-str is supported
-}`),'all'))
+}`),{indentTarget:'all'}))
 console.log(ston.stringify(ston.parse(`[
     -Infinity
     +2e-3

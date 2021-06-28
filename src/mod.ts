@@ -228,18 +228,24 @@ export function parse(string:string):STONObject|STONArray|string|number|boolean|
 function stringifyString(string:string){
     return "'"+string.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/(^|[^\\])\\\\(?=[^\\"'])/g,'$1\\')+"'"
 }
-type BeautifyTarget='none'|'all'|'array'|'object'|'arrayInObject'|'arrayInObjectAndThis'
-type AddComma='auto'|'always'|'inObject'
-function stringifyArray(array:STONArray,beautify:BeautifyTarget,addComma:AddComma,level=1){
+interface BeautifyOptions{
+    indentTarget?:'none'|'all'|'array'|'object'|'arrayInObject'|'arrayInObjectAndThis'
+    indentLevel?:number
+    addDecorativeComma?:'never'|'always'|'inObject'
+}
+function stringifyArray(array:STONArray,{indentTarget,indentLevel,addDecorativeComma}:BeautifyOptions){
+    indentTarget=indentTarget??'none'
+    indentLevel=indentLevel??1
+    addDecorativeComma=addDecorativeComma??'never'
     const out:string[]=[]
-    const expand=array.length>1&&(beautify==='all'||beautify==='array'||beautify==='arrayInObjectAndThis')
-    if(beautify==='arrayInObjectAndThis'){
-        beautify='arrayInObject'
+    const expand=array.length>1&&(indentTarget==='all'||indentTarget==='array'||indentTarget==='arrayInObjectAndThis')
+    if(indentTarget==='arrayInObjectAndThis'){
+        indentTarget='arrayInObject'
     }
     for(let i=0;i<array.length;i++){
-        const string=stringify(array[i],beautify,addComma,level+(expand?1:0))
+        const string=stringify(array[i],{indentTarget,indentLevel:indentLevel+(expand?1:0),addDecorativeComma})
         if(
-            (string.endsWith("'")||string.endsWith('}')||string.endsWith(']'))&&addComma!=='always'
+            (string.endsWith("'")||string.endsWith('}')||string.endsWith(']'))&&addDecorativeComma!=='always'
             ||i===(array.length-1)||expand
         ){
             out.push(string)
@@ -248,7 +254,7 @@ function stringifyArray(array:STONArray,beautify:BeautifyTarget,addComma:AddComm
         }
     }
     let add=''
-    for(let i=1;i<level;i++){
+    for(let i=1;i<indentLevel;i++){
         add+='    '
     }
     if(expand){
@@ -257,12 +263,15 @@ function stringifyArray(array:STONArray,beautify:BeautifyTarget,addComma:AddComm
         return '['+out.join('')+']'
     }
 }
-function stringifyObject(object:STONObject,beautify:BeautifyTarget,addComma:AddComma,level=1){
+function stringifyObject(object:STONObject,{indentTarget,indentLevel,addDecorativeComma}:BeautifyOptions){
+    indentTarget=indentTarget??'none'
+    indentLevel=indentLevel??1
+    addDecorativeComma=addDecorativeComma??'never'
     const out:string[]=[]
     const keys=Object.keys(object)
-    const expand=keys.length>1&&(beautify==='all'||beautify==='object')
-    if(beautify==='arrayInObject'){
-        beautify='arrayInObjectAndThis'
+    const expand=keys.length>1&&(indentTarget==='all'||indentTarget==='object')
+    if(indentTarget==='arrayInObject'){
+        indentTarget='arrayInObjectAndThis'
     }
     for(let i=0;i<keys.length;i++){
         const key=keys[i]
@@ -271,9 +280,9 @@ function stringifyObject(object:STONObject,beautify:BeautifyTarget,addComma:AddC
             continue
         }
         const value=object[key]
-        const string=stringify(value,beautify,addComma,level+(expand?1:0))
+        const string=stringify(value,{indentTarget,indentLevel:indentLevel+(expand?1:0),addDecorativeComma})
         if(string.startsWith("'")||string.startsWith('[')||string.startsWith('{')){
-            if(addComma!=='always'&&addComma!=='inObject'||i===(keys.length-1)||expand){
+            if(addDecorativeComma!=='always'&&addDecorativeComma!=='inObject'||i===(keys.length-1)||expand){
                 out.push((key==='__'?'':key)+string)
             }else{
                 out.push((key==='__'?'':key)+string+',')
@@ -293,7 +302,7 @@ function stringifyObject(object:STONObject,beautify:BeautifyTarget,addComma:AddC
         }
     }
     let add=''
-    for(let i=1;i<level;i++){
+    for(let i=1;i<indentLevel;i++){
         add+='    '
     }
     if(expand){
@@ -302,7 +311,7 @@ function stringifyObject(object:STONObject,beautify:BeautifyTarget,addComma:AddC
         return '{'+out.join('')+'}'
     }
 }
-export function stringify(ston:STONObject|STONArray|string|number|boolean|undefined,beautify:BeautifyTarget='none',addComma:AddComma='auto',level=1){
+export function stringify(ston:STONObject|STONArray|string|number|boolean|undefined,beautifyOptions:BeautifyOptions={}){
     if(ston===undefined){
         return ''
     }
@@ -319,7 +328,7 @@ export function stringify(ston:STONObject|STONArray|string|number|boolean|undefi
         return 'false'
     }
     if(Array.isArray(ston)){
-        return stringifyArray(ston,beautify,addComma,level)
+        return stringifyArray(ston,beautifyOptions)
     }
-    return stringifyObject(ston,beautify,addComma,level)
+    return stringifyObject(ston,beautifyOptions)
 }
