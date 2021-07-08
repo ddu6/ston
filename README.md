@@ -10,22 +10,20 @@ console.log(ston.stringify(ston.parse(`{
     - str val can not be quoted with double quotes
     */
     unquoted-str is supported
-}`),{indentTarget:'all'}))
-console.log(ston.stringify(ston.parse(`[
-    -Infinity
-    +2e-3
-    .5
-    0xFF
-    0b11
-    0o66
-]`)))
+    number[
+        .5
+        +2e-3
+        [-Infinity,NaN]
+        [0xFF,0b11,0o66]
+    ]
+}`),{indentTarget:'object'}))
 
 /* output
 {
     standalone-key
     'default key'
     unquoted-str'is supported'
+    number[0.5,0.002,[-Infinity,NaN][255,3,54]]
 }
-[-Infinity,0.002,0.5,255,3,54]
 */
 ```

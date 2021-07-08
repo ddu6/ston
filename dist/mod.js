@@ -1,6 +1,152 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.stringify = exports.parse = void 0;
+exports.stringify = exports.parse = exports.parseWithIndex = void 0;
+function splitToArrayWithIndex(string, index, keepKey = false) {
+    let count = 0;
+    let quote = false;
+    let escape = false;
+    let last = 0;
+    let comment = false;
+    const array = [];
+    for (let i = 0; i < string.length; i++) {
+        if (escape === true) {
+            escape = false;
+            continue;
+        }
+        const char = string[i];
+        if (comment === 'line') {
+            if (char === '\n') {
+                comment = false;
+            }
+            last = i + 1;
+            continue;
+        }
+        if (comment === 'block') {
+            if (char === '*') {
+                const next = string[i + 1];
+                if (next === '/') {
+                    i++;
+                    comment = false;
+                }
+            }
+            last = i + 1;
+            continue;
+        }
+        if (char === "'") {
+            if (!quote) {
+                quote = true;
+                if (count === 0 && !keepKey) {
+                    const tmp = string.slice(last, i).trimEnd();
+                    if (tmp !== '') {
+                        array.push({
+                            value: tmp,
+                            index: index + last
+                        });
+                    }
+                    last = i;
+                }
+                continue;
+            }
+            quote = false;
+            if (count === 0) {
+                array.push({
+                    value: string.slice(last, i + 1),
+                    index: index + last
+                });
+                last = i + 1;
+            }
+            continue;
+        }
+        if (quote) {
+            if (char === '\\') {
+                escape = true;
+                continue;
+            }
+            continue;
+        }
+        if (char === '{' || char === '[') {
+            count++;
+            if (count === 1 && !keepKey) {
+                const tmp = string.slice(last, i).trimEnd();
+                if (tmp !== '') {
+                    array.push({
+                        value: tmp,
+                        index: index + last
+                    });
+                }
+                last = i;
+            }
+            continue;
+        }
+        if (char === '}' || char === ']') {
+            count--;
+            if (count < 0) {
+                const tmp = string.slice(last, i).trimEnd();
+                if (tmp !== '') {
+                    array.push({
+                        value: tmp,
+                        index: index + last
+                    });
+                }
+                break;
+            }
+            if (count === 0) {
+                array.push({
+                    value: string.slice(last, i + 1),
+                    index: index + last
+                });
+                last = i + 1;
+            }
+            continue;
+        }
+        if (count > 0) {
+            continue;
+        }
+        if (char === ',' || char === '\n') {
+            const tmp = string.slice(last, i).trimEnd();
+            if (tmp !== '') {
+                array.push({
+                    value: tmp,
+                    index: index + last
+                });
+            }
+            last = i + 1;
+            continue;
+        }
+        if (last < i) {
+            continue;
+        }
+        if (char.trimEnd() === '') {
+            last = i + 1;
+            continue;
+        }
+        if (char === '/') {
+            const next = string[i + 1];
+            if (next === '/') {
+                i++;
+                comment = 'line';
+                last = i + 1;
+                continue;
+            }
+            if (next === '*') {
+                i++;
+                comment = 'block';
+                last = i + 1;
+                continue;
+            }
+        }
+    }
+    if (!quote && count === 0) {
+        const tmp = string.slice(last).trimEnd();
+        if (tmp !== '') {
+            array.push({
+                value: tmp,
+                index: index + last
+            });
+        }
+    }
+    return array;
+}
 function splitToArray(string, keepKey = false) {
     let count = 0;
     let quote = false;
@@ -36,11 +182,11 @@ function splitToArray(string, keepKey = false) {
             if (!quote) {
                 quote = true;
                 if (count === 0 && !keepKey) {
-                    const tmp = string.slice(last, i).trim();
-                    last = i;
+                    const tmp = string.slice(last, i).trimEnd();
                     if (tmp !== '') {
                         array.push(tmp);
                     }
+                    last = i;
                 }
                 continue;
             }
@@ -61,18 +207,18 @@ function splitToArray(string, keepKey = false) {
         if (char === '{' || char === '[') {
             count++;
             if (count === 1 && !keepKey) {
-                const tmp = string.slice(last, i).trim();
-                last = i;
+                const tmp = string.slice(last, i).trimEnd();
                 if (tmp !== '') {
                     array.push(tmp);
                 }
+                last = i;
             }
             continue;
         }
         if (char === '}' || char === ']') {
             count--;
             if (count < 0) {
-                const tmp = string.slice(last, i).trim();
+                const tmp = string.slice(last, i).trimEnd();
                 if (tmp !== '') {
                     array.push(tmp);
                 }
@@ -88,17 +234,17 @@ function splitToArray(string, keepKey = false) {
             continue;
         }
         if (char === ',' || char === '\n') {
-            const tmp = string.slice(last, i).trim();
-            last = i + 1;
+            const tmp = string.slice(last, i).trimEnd();
             if (tmp !== '') {
                 array.push(tmp);
             }
+            last = i + 1;
             continue;
         }
         if (last < i) {
             continue;
         }
-        if (char.trim() === '') {
+        if (char.trimEnd() === '') {
             last = i + 1;
             continue;
         }
@@ -119,12 +265,24 @@ function splitToArray(string, keepKey = false) {
         }
     }
     if (!quote && count === 0) {
-        const tmp = string.slice(last).trim();
+        const tmp = string.slice(last).trimEnd();
         if (tmp !== '') {
             array.push(tmp);
         }
     }
     return array;
+}
+function tempArrayToSTONArrayValueWithIndex(array) {
+    const out = [];
+    for (let i = 0; i < array.length; i++) {
+        const { value, index } = array[i];
+        const ston = parseWithIndex(value, index);
+        if (ston === undefined) {
+            return undefined;
+        }
+        out.push(ston);
+    }
+    return out;
 }
 function tempArrayToSTONArray(array) {
     const out = [];
@@ -137,11 +295,43 @@ function tempArrayToSTONArray(array) {
     }
     return out;
 }
+function tempArrayToSTONObjectValueWithIndex(array) {
+    const out = {};
+    for (let i = 0; i < array.length; i++) {
+        const { value, index } = array[i];
+        const result = value.match(/^\s*([\w-]+)/);
+        if (result === null) {
+            const ston = parseWithIndex(value, index);
+            if (ston === undefined) {
+                return undefined;
+            }
+            out.__ = ston;
+            continue;
+        }
+        const key = result[1];
+        const length = result[0].length;
+        let valStr = value.slice(length).trimEnd();
+        if (valStr === '') {
+            out[key] = {
+                value: true,
+                index: index + length
+            };
+        }
+        else {
+            const value = parseWithIndex(valStr, index + length);
+            if (value === undefined) {
+                return undefined;
+            }
+            out[key] = value;
+        }
+    }
+    return out;
+}
 function tempArrayToSTONObject(array) {
     const out = {};
     for (let i = 0; i < array.length; i++) {
-        const string = array[i].trimStart();
-        const result = string.match(/^[\w-]+/);
+        const string = array[i];
+        const result = string.match(/^\s*([\w-]+)/);
         if (result === null) {
             const ston = parse(string);
             if (ston === undefined) {
@@ -150,8 +340,9 @@ function tempArrayToSTONObject(array) {
             out.__ = ston;
             continue;
         }
-        const key = result[0];
-        let valStr = string.slice(key.length).trimStart();
+        const key = result[1];
+        const length = result[0].length;
+        let valStr = string.slice(length).trimEnd();
         if (valStr === '') {
             out[key] = true;
         }
@@ -189,12 +380,61 @@ function parseToString(string) {
     }
     return array.join('');
 }
+function parseToArrayValueWithIndex(string, index) {
+    return tempArrayToSTONArrayValueWithIndex(splitToArrayWithIndex(string, index));
+}
 function parseToArray(string) {
     return tempArrayToSTONArray(splitToArray(string));
+}
+function parseToObjectValueWithIndex(string, index) {
+    return tempArrayToSTONObjectValueWithIndex(splitToArrayWithIndex(string, index, true));
 }
 function parseToObject(string) {
     return tempArrayToSTONObject(splitToArray(string, true));
 }
+function parseToValueWithIndex(string, index) {
+    if (string === '') {
+        return undefined;
+    }
+    const start = string[0];
+    if (start === "'") {
+        return parseToString(string.slice(1));
+    }
+    if (start === '[') {
+        return parseToArrayValueWithIndex(string.slice(1), index + 1);
+    }
+    if (start === '{') {
+        return parseToObjectValueWithIndex(string.slice(1), index + 1);
+    }
+    string = string.trimEnd();
+    if (string === 'true') {
+        return true;
+    }
+    if (string === 'false') {
+        return false;
+    }
+    if (/^(?:[+-]?Infinity|NaN|0x[\da-fA-F]+|0o[0-7]+|0b[01]+|[+-]?(?:\d*\.?\d+|\d+\.)(?:e[+-]?\d+)?)$/.test(string)) {
+        return Number(string);
+    }
+    if (/[',{}\[\]\n\r]/.test(string)) {
+        return undefined;
+    }
+    return string;
+}
+function parseWithIndex(string, index = 0) {
+    index += string.length;
+    string = string.trimStart();
+    index -= string.length;
+    const value = parseToValueWithIndex(string, index);
+    if (value === undefined) {
+        return undefined;
+    }
+    return {
+        value: value,
+        index
+    };
+}
+exports.parseWithIndex = parseWithIndex;
 function parse(string) {
     string = string.trimStart();
     if (string === '') {
