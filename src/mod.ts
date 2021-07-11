@@ -1,8 +1,8 @@
 export type STONObject={
-    [key:string]:STON
+    [key:string]:STON|undefined
 }
 export type STONObjectValueWithIndex={
-    [key:string]:STONWithIndex
+    [key:string]:STONWithIndex|undefined
 }
 export type STONArray=STON[]
 export type STONArrayValueWithIndex=STONWithIndex[]

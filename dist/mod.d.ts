@@ -1,8 +1,8 @@
 export declare type STONObject = {
-    [key: string]: STON;
+    [key: string]: STON | undefined;
 };
 export declare type STONObjectValueWithIndex = {
-    [key: string]: STONWithIndex;
+    [key: string]: STONWithIndex | undefined;
 };
 export declare type STONArray = STON[];
 export declare type STONArrayValueWithIndex = STONWithIndex[];
