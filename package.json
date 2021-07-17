@@ -8,12 +8,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ddu6/ston.git"
+    "url": "git+https://github.com/st-org/ston.git"
   },
   "author": "ddu6",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ddu6/ston/issues"
+    "url": "https://github.com/st-org/ston/issues"
   },
-  "homepage": "https://github.com/ddu6/ston#readme"
+  "homepage": "https://github.com/st-org/ston#readme"
 }
