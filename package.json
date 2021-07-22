@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/st-org/ston/issues"
   },
-  "homepage": "https://github.com/st-org/ston#readme"
+  "homepage": "https://github.com/st-org/ston#readme",
+  "engines": {
+    "node": "^14.0.0",
+    "npm": "^7.0.0"
+  }
 }

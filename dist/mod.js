@@ -470,9 +470,9 @@ function stringifyString(string) {
     return "'" + string.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/(^|[^\\])\\\\(?=[^\\"'])/g, '$1\\') + "'";
 }
 function stringifyArray(array, { indentTarget, indentLevel, addDecorativeComma }) {
-    indentTarget = indentTarget !== null && indentTarget !== void 0 ? indentTarget : 'none';
-    indentLevel = indentLevel !== null && indentLevel !== void 0 ? indentLevel : 1;
-    addDecorativeComma = addDecorativeComma !== null && addDecorativeComma !== void 0 ? addDecorativeComma : 'never';
+    indentTarget = indentTarget ?? 'none';
+    indentLevel = indentLevel ?? 1;
+    addDecorativeComma = addDecorativeComma ?? 'never';
     const out = [];
     const expand = array.length > 1 && (indentTarget === 'all' || indentTarget === 'array' || indentTarget === 'arrayInObjectAndThis');
     if (indentTarget === 'arrayInObjectAndThis') {
@@ -500,9 +500,9 @@ function stringifyArray(array, { indentTarget, indentLevel, addDecorativeComma }
     }
 }
 function stringifyObject(object, { indentTarget, indentLevel, addDecorativeComma }) {
-    indentTarget = indentTarget !== null && indentTarget !== void 0 ? indentTarget : 'none';
-    indentLevel = indentLevel !== null && indentLevel !== void 0 ? indentLevel : 1;
-    addDecorativeComma = addDecorativeComma !== null && addDecorativeComma !== void 0 ? addDecorativeComma : 'never';
+    indentTarget = indentTarget ?? 'none';
+    indentLevel = indentLevel ?? 1;
+    addDecorativeComma = addDecorativeComma ?? 'never';
     const out = [];
     const keys = Object.keys(object);
     const expand = keys.length > 1 && (indentTarget === 'all' || indentTarget === 'object');
