@@ -1,46 +1,55 @@
-export type STONObject={
+export interface STONObject{
     [key:string]:STON|undefined
 }
-export type STONObjectValueWithIndex={
+export interface STONObjectValueWithIndex{
     [key:string]:STONWithIndex|undefined
 }
 export type STONArray=STON[]
 export type STONArrayValueWithIndex=STONWithIndex[]
 export type STON=STONObject|STONArray|string|number|boolean
 export type STONValueWithIndex=STONObjectValueWithIndex|STONArrayValueWithIndex|string|number|boolean
-export type STONWithIndex={
+export interface STONWithIndex{
     value:STONValueWithIndex
     index:number
+    comment:string
+}
+export interface StringWithIndex{
+    value:string
+    index:number
+    comment:string
 }
 function splitToArrayWithIndex(string:string,index:number,keepKey=false){
     let count=0
     let quote=false
     let escape=false
     let last=0
-    let comment:false|'line'|'block'=false
-    const array:{value:string,index:number}[]=[]
+    let commentType:false|'line'|'block'=false
+    let comments:string[]=[]
+    const array:StringWithIndex[]=[]
     for(let i=0;i<string.length;i++){
         if(escape===true){
             escape=false
             continue
         }
         const char=string[i]
-        if(comment==='line'){
+        if(commentType==='line'){
             if(char==='\n'){
-                comment=false
+                commentType=false
+                comments.push(string.slice(last,i).trimEnd())
+                last=i+1
             }
-            last=i+1
             continue
         }
-        if(comment==='block'){
+        if(commentType==='block'){
             if(char==='*'){
                 const next=string[i+1]
                 if(next==='/'){
                     i++
-                    comment=false
+                    commentType=false
+                    comments.push(string.slice(last,i+1).replace(/\n[ ]*/g,'\n '))
+                    last=i+1
                 }
             }
-            last=i+1
             continue
         }
         if(char==="'"){
@@ -51,8 +60,10 @@ function splitToArrayWithIndex(string:string,index:number,keepKey=false){
                     if(tmp!==''){
                         array.push({
                             value:tmp,
-                            index:index+last
+                            index:index+last,
+                            comment:comments.join('\n')
                         })
+                        comments=[]
                     }
                     last=i
                 }
@@ -62,8 +73,10 @@ function splitToArrayWithIndex(string:string,index:number,keepKey=false){
             if(count===0){
                 array.push({
                     value:string.slice(last,i+1),
-                    index:index+last
+                    index:index+last,
+                    comment:comments.join('\n')
                 })
+                comments=[]
                 last=i+1
             }
             continue
@@ -82,8 +95,10 @@ function splitToArrayWithIndex(string:string,index:number,keepKey=false){
                 if(tmp!==''){
                     array.push({
                         value:tmp,
-                        index:index+last
+                        index:index+last,
+                        comment:comments.join('\n')
                     })
+                    comments=[]
                 }
                 last=i
             }
@@ -96,16 +111,20 @@ function splitToArrayWithIndex(string:string,index:number,keepKey=false){
                 if(tmp!==''){
                     array.push({
                         value:tmp,
-                        index:index+last
+                        index:index+last,
+                        comment:comments.join('\n')
                     })
+                    comments=[]
                 }
                 break
             }
             if(count===0){
                 array.push({
                     value:string.slice(last,i+1),
-                    index:index+last
+                    index:index+last,
+                    comment:comments.join('\n')
                 })
+                comments=[]
                 last=i+1
             }
             continue
@@ -118,8 +137,10 @@ function splitToArrayWithIndex(string:string,index:number,keepKey=false){
             if(tmp!==''){
                 array.push({
                     value:tmp,
-                    index:index+last
+                    index:index+last,
+                    comment:comments.join('\n')
                 })
+                comments=[]
             }
             last=i+1
             continue
@@ -134,25 +155,26 @@ function splitToArrayWithIndex(string:string,index:number,keepKey=false){
         if(char==='/'){
             const next=string[i+1]
             if(next==='/'){
+                last=i
                 i++
-                comment='line'
-                last=i+1
+                commentType='line'
                 continue
             }
             if(next==='*'){
+                last=i
                 i++
-                comment='block'
-                last=i+1
+                commentType='block'
                 continue
             }
         }
     }
-    if(!quote&&count===0){
+    if(!quote&&count===0&&commentType===false){
         const tmp=string.slice(last).trimEnd()
         if(tmp!==''){
             array.push({
                 value:tmp,
-                index:index+last
+                index:index+last,
+                comment:comments.join('\n')
             })
         }
     }
@@ -163,7 +185,7 @@ function splitToArray(string:string,keepKey=false){
     let quote=false
     let escape=false
     let last=0
-    let comment:false|'line'|'block'=false
+    let commentType:false|'line'|'block'=false
     const array:string[]=[]
     for(let i=0;i<string.length;i++){
         if(escape===true){
@@ -171,19 +193,19 @@ function splitToArray(string:string,keepKey=false){
             continue
         }
         const char=string[i]
-        if(comment==='line'){
+        if(commentType==='line'){
             if(char==='\n'){
-                comment=false
+                commentType=false
             }
             last=i+1
             continue
         }
-        if(comment==='block'){
+        if(commentType==='block'){
             if(char==='*'){
                 const next=string[i+1]
                 if(next==='/'){
                     i++
-                    comment=false
+                    commentType=false
                 }
             }
             last=i+1
@@ -263,13 +285,13 @@ function splitToArray(string:string,keepKey=false){
             const next=string[i+1]
             if(next==='/'){
                 i++
-                comment='line'
+                commentType='line'
                 last=i+1
                 continue
             }
             if(next==='*'){
                 i++
-                comment='block'
+                commentType='block'
                 last=i+1
                 continue
             }
@@ -283,11 +305,10 @@ function splitToArray(string:string,keepKey=false){
     }
     return array
 }
-function tempArrayToSTONArrayValueWithIndex(array:{value:string,index:number}[]){
+function tempArrayToSTONArrayValueWithIndex(array:StringWithIndex[]){
     const out:STONArrayValueWithIndex=[]
-    for(let i=0;i<array.length;i++){
-        const {value,index}=array[i]
-        const ston=parseWithIndex(value,index)
+    for(const {value,index,comment} of array){
+        const ston=parseWithIndex(value,index,comment)
         if(ston===undefined){
             return undefined
         }
@@ -306,13 +327,12 @@ function tempArrayToSTONArray(array:string[]){
     }
     return out
 }
-function tempArrayToSTONObjectValueWithIndex(array:{value:string,index:number}[]){
+function tempArrayToSTONObjectValueWithIndex(array:StringWithIndex[]){
     const out:STONObjectValueWithIndex={}
-    for(let i=0;i<array.length;i++){
-        const {value,index}=array[i]
+    for(const {value,index,comment} of array){
         const result=value.match(/^\s*([\w-]+)/)
         if(result===null){
-            const ston=parseWithIndex(value,index)
+            const ston=parseWithIndex(value,index,comment)
             if(ston===undefined){
                 return undefined
             }
@@ -325,10 +345,11 @@ function tempArrayToSTONObjectValueWithIndex(array:{value:string,index:number}[]
         if(valStr===''){
             out[key]={
                 value:true,
-                index:index+length
+                index:index+length,
+                comment
             }
         }else{
-            const value=parseWithIndex(valStr,index+length)
+            const value=parseWithIndex(valStr,index+length,comment)
             if(value===undefined){
                 return undefined
             }
@@ -430,7 +451,7 @@ function parseToValueWithIndex(string:string,index:number):STONValueWithIndex|un
     }
     return string
 }
-export function parseWithIndex(string:string,index=0):STONWithIndex|undefined{
+export function parseWithIndex(string:string,index=0,comment=''):STONWithIndex|undefined{
     index+=string.length
     string=string.trimStart()
     index-=string.length
@@ -440,7 +461,8 @@ export function parseWithIndex(string:string,index=0):STONWithIndex|undefined{
     }
     return {
         value:value,
-        index
+        index,
+        comment
     }
 }
 export function parse(string:string):STON|undefined{
@@ -481,9 +503,49 @@ export interface BeautifyOptions{
     indentLevel?:number
     addDecorativeComma?:'never'|'always'|'inObject'
 }
+function stringifyArrayWithComment(array:STONArrayValueWithIndex,{indentTarget,indentLevel,addDecorativeComma}:BeautifyOptions){
+    indentTarget=indentTarget??'none'
+    indentLevel=indentLevel??0
+    addDecorativeComma=addDecorativeComma??'never'
+    const out:string[]=[]
+    const expand=array.length>1
+    &&(indentTarget==='all'||indentTarget==='array'||indentTarget==='arrayInObjectAndThis')
+    ||array.find(val=>val.comment!=='')!==undefined
+    if(indentTarget==='arrayInObjectAndThis'){
+        indentTarget='arrayInObject'
+    }
+    for(let i=0;i<array.length;i++){
+        const {value,comment}=array[i]
+        const string=stringifyWithComment(value,{indentTarget,indentLevel:indentLevel+(expand?1:0),addDecorativeComma})
+        if(
+            (string.endsWith("'")||string.endsWith('}')||string.endsWith(']'))&&addDecorativeComma!=='always'
+            ||i===(array.length-1)||expand
+        ){
+            if(comment!==''){
+                out.push(...comment.split('\n'))
+            }
+            out.push(string)
+        }else{
+            out.push(string+',')
+        }
+    }
+    let footAdd='\n'
+    for(let i=0;i<indentLevel;i++){
+        footAdd+='    '
+    }
+    let bodyAdd=footAdd
+    if(indentLevel>=0){
+        bodyAdd+='    '
+    }
+    if(expand){
+        return '['+bodyAdd+out.join(bodyAdd)+footAdd+']'
+    }else{
+        return '['+out.join('')+']'
+    }
+}
 function stringifyArray(array:STONArray,{indentTarget,indentLevel,addDecorativeComma}:BeautifyOptions){
     indentTarget=indentTarget??'none'
-    indentLevel=indentLevel??1
+    indentLevel=indentLevel??0
     addDecorativeComma=addDecorativeComma??'never'
     const out:string[]=[]
     const expand=array.length>1&&(indentTarget==='all'||indentTarget==='array'||indentTarget==='arrayInObjectAndThis')
@@ -501,19 +563,95 @@ function stringifyArray(array:STONArray,{indentTarget,indentLevel,addDecorativeC
             out.push(string+',')
         }
     }
-    let add=''
-    for(let i=1;i<indentLevel;i++){
-        add+='    '
+    let footAdd='\n'
+    for(let i=0;i<indentLevel;i++){
+        footAdd+='    '
+    }
+    let bodyAdd=footAdd
+    if(indentLevel>=0){
+        bodyAdd+='    '
     }
     if(expand){
-        return '['+'\n    '+add+out.join('\n    '+add)+'\n'+add+']'
+        return '['+bodyAdd+out.join(bodyAdd)+footAdd+']'
     }else{
         return '['+out.join('')+']'
     }
 }
+function stringifyObjectWithComment(object:STONObjectValueWithIndex,{indentTarget,indentLevel,addDecorativeComma}:BeautifyOptions){
+    indentTarget=indentTarget??'none'
+    indentLevel=indentLevel??0
+    addDecorativeComma=addDecorativeComma??'never'
+    const out:string[]=[]
+    const keys=Object.keys(object)
+    let expand=keys.length>1
+    &&(indentTarget==='all'||indentTarget==='object')
+    if(!expand){
+        for(const key of keys){
+            const val=object[key]
+            if(val===undefined){
+                continue
+            }
+            if(val.comment!==''){
+                expand=true
+                break
+            }
+        }
+    }
+    if(indentTarget==='arrayInObject'){
+        indentTarget='arrayInObjectAndThis'
+    }
+    for(let i=0;i<keys.length;i++){
+        const key=keys[i]
+        const result=key.match(/^[\w-]+$/)
+        if(result===null){
+            continue
+        }
+        const val=object[key]
+        if(val===undefined){
+            continue
+        }
+        const {value,comment}=val
+        const string=stringifyWithComment(value,{indentTarget,indentLevel:indentLevel+(expand?1:0),addDecorativeComma})
+        if(comment!==''){
+            out.push(...comment.split('\n'))
+        }
+        if(string.startsWith("'")||string.startsWith('[')||string.startsWith('{')){
+            if(addDecorativeComma!=='always'&&addDecorativeComma!=='inObject'||i===(keys.length-1)||expand){
+                out.push((key==='__'?'':key)+string)
+            }else{
+                out.push((key==='__'?'':key)+string+',')
+            }
+        }else if(string==='true'){
+            if(i===(keys.length-1)||expand){
+                out.push(key)
+            }else{
+                out.push(key+',')
+            }
+        }else{
+            if(i===(keys.length-1)||expand){
+                out.push(key+' '+string)
+            }else{
+                out.push(key+' '+string+',')
+            }
+        }
+    }
+    let footAdd='\n'
+    for(let i=0;i<indentLevel;i++){
+        footAdd+='    '
+    }
+    let bodyAdd=footAdd
+    if(indentLevel>=0){
+        bodyAdd+='    '
+    }
+    if(expand){
+        return '{'+bodyAdd+out.join(bodyAdd)+footAdd+'}'
+    }else{
+        return '{'+out.join('')+'}'
+    }
+}
 function stringifyObject(object:STONObject,{indentTarget,indentLevel,addDecorativeComma}:BeautifyOptions){
     indentTarget=indentTarget??'none'
-    indentLevel=indentLevel??1
+    indentLevel=indentLevel??0
     addDecorativeComma=addDecorativeComma??'never'
     const out:string[]=[]
     const keys=Object.keys(object)
@@ -528,6 +666,9 @@ function stringifyObject(object:STONObject,{indentTarget,indentLevel,addDecorati
             continue
         }
         const value=object[key]
+        if(value===undefined){
+            continue
+        }
         const string=stringify(value,{indentTarget,indentLevel:indentLevel+(expand?1:0),addDecorativeComma})
         if(string.startsWith("'")||string.startsWith('[')||string.startsWith('{')){
             if(addDecorativeComma!=='always'&&addDecorativeComma!=='inObject'||i===(keys.length-1)||expand){
@@ -549,15 +690,40 @@ function stringifyObject(object:STONObject,{indentTarget,indentLevel,addDecorati
             }
         }
     }
-    let add=''
-    for(let i=1;i<indentLevel;i++){
-        add+='    '
+    let footAdd='\n'
+    for(let i=0;i<indentLevel;i++){
+        footAdd+='    '
+    }
+    let bodyAdd=footAdd
+    if(indentLevel>=0){
+        bodyAdd+='    '
     }
     if(expand){
-        return '{'+'\n    '+add+out.join('\n    '+add)+'\n'+add+'}'
+        return '{'+bodyAdd+out.join(bodyAdd)+footAdd+'}'
     }else{
         return '{'+out.join('')+'}'
     }
+}
+export function stringifyWithComment(ston:STONValueWithIndex|undefined,beautifyOptions:BeautifyOptions={}){
+    if(ston===undefined){
+        return ''
+    }
+    if(typeof ston==='number'){
+        return ston.toString()
+    }
+    if(typeof ston==='string'){
+        return stringifyString(ston)
+    }
+    if(ston===true){
+        return 'true'
+    }
+    if(ston===false){
+        return 'false'
+    }
+    if(Array.isArray(ston)){
+        return stringifyArrayWithComment(ston,beautifyOptions)
+    }
+    return stringifyObjectWithComment(ston,beautifyOptions)
 }
 export function stringify(ston:STON|undefined,beautifyOptions:BeautifyOptions={}){
     if(ston===undefined){

@@ -1,12 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.stringify = exports.parse = exports.parseWithIndex = void 0;
+exports.stringify = exports.stringifyWithComment = exports.parse = exports.parseWithIndex = void 0;
 function splitToArrayWithIndex(string, index, keepKey = false) {
     let count = 0;
     let quote = false;
     let escape = false;
     let last = 0;
-    let comment = false;
+    let commentType = false;
+    let comments = [];
     const array = [];
     for (let i = 0; i < string.length; i++) {
         if (escape === true) {
@@ -14,22 +15,24 @@ function splitToArrayWithIndex(string, index, keepKey = false) {
             continue;
         }
         const char = string[i];
-        if (comment === 'line') {
+        if (commentType === 'line') {
             if (char === '\n') {
-                comment = false;
+                commentType = false;
+                comments.push(string.slice(last, i).trimEnd());
+                last = i + 1;
             }
-            last = i + 1;
             continue;
         }
-        if (comment === 'block') {
+        if (commentType === 'block') {
             if (char === '*') {
                 const next = string[i + 1];
                 if (next === '/') {
                     i++;
-                    comment = false;
+                    commentType = false;
+                    comments.push(string.slice(last, i + 1).replace(/\n[ ]*/g, '\n '));
+                    last = i + 1;
                 }
             }
-            last = i + 1;
             continue;
         }
         if (char === "'") {
@@ -40,8 +43,10 @@ function splitToArrayWithIndex(string, index, keepKey = false) {
                     if (tmp !== '') {
                         array.push({
                             value: tmp,
-                            index: index + last
+                            index: index + last,
+                            comment: comments.join('\n')
                         });
+                        comments = [];
                     }
                     last = i;
                 }
@@ -51,8 +56,10 @@ function splitToArrayWithIndex(string, index, keepKey = false) {
             if (count === 0) {
                 array.push({
                     value: string.slice(last, i + 1),
-                    index: index + last
+                    index: index + last,
+                    comment: comments.join('\n')
                 });
+                comments = [];
                 last = i + 1;
             }
             continue;
@@ -71,8 +78,10 @@ function splitToArrayWithIndex(string, index, keepKey = false) {
                 if (tmp !== '') {
                     array.push({
                         value: tmp,
-                        index: index + last
+                        index: index + last,
+                        comment: comments.join('\n')
                     });
+                    comments = [];
                 }
                 last = i;
             }
@@ -85,16 +94,20 @@ function splitToArrayWithIndex(string, index, keepKey = false) {
                 if (tmp !== '') {
                     array.push({
                         value: tmp,
-                        index: index + last
+                        index: index + last,
+                        comment: comments.join('\n')
                     });
+                    comments = [];
                 }
                 break;
             }
             if (count === 0) {
                 array.push({
                     value: string.slice(last, i + 1),
-                    index: index + last
+                    index: index + last,
+                    comment: comments.join('\n')
                 });
+                comments = [];
                 last = i + 1;
             }
             continue;
@@ -107,8 +120,10 @@ function splitToArrayWithIndex(string, index, keepKey = false) {
             if (tmp !== '') {
                 array.push({
                     value: tmp,
-                    index: index + last
+                    index: index + last,
+                    comment: comments.join('\n')
                 });
+                comments = [];
             }
             last = i + 1;
             continue;
@@ -123,25 +138,26 @@ function splitToArrayWithIndex(string, index, keepKey = false) {
         if (char === '/') {
             const next = string[i + 1];
             if (next === '/') {
+                last = i;
                 i++;
-                comment = 'line';
-                last = i + 1;
+                commentType = 'line';
                 continue;
             }
             if (next === '*') {
+                last = i;
                 i++;
-                comment = 'block';
-                last = i + 1;
+                commentType = 'block';
                 continue;
             }
         }
     }
-    if (!quote && count === 0) {
+    if (!quote && count === 0 && commentType === false) {
         const tmp = string.slice(last).trimEnd();
         if (tmp !== '') {
             array.push({
                 value: tmp,
-                index: index + last
+                index: index + last,
+                comment: comments.join('\n')
             });
         }
     }
@@ -152,7 +168,7 @@ function splitToArray(string, keepKey = false) {
     let quote = false;
     let escape = false;
     let last = 0;
-    let comment = false;
+    let commentType = false;
     const array = [];
     for (let i = 0; i < string.length; i++) {
         if (escape === true) {
@@ -160,19 +176,19 @@ function splitToArray(string, keepKey = false) {
             continue;
         }
         const char = string[i];
-        if (comment === 'line') {
+        if (commentType === 'line') {
             if (char === '\n') {
-                comment = false;
+                commentType = false;
             }
             last = i + 1;
             continue;
         }
-        if (comment === 'block') {
+        if (commentType === 'block') {
             if (char === '*') {
                 const next = string[i + 1];
                 if (next === '/') {
                     i++;
-                    comment = false;
+                    commentType = false;
                 }
             }
             last = i + 1;
@@ -252,13 +268,13 @@ function splitToArray(string, keepKey = false) {
             const next = string[i + 1];
             if (next === '/') {
                 i++;
-                comment = 'line';
+                commentType = 'line';
                 last = i + 1;
                 continue;
             }
             if (next === '*') {
                 i++;
-                comment = 'block';
+                commentType = 'block';
                 last = i + 1;
                 continue;
             }
@@ -274,9 +290,8 @@ function splitToArray(string, keepKey = false) {
 }
 function tempArrayToSTONArrayValueWithIndex(array) {
     const out = [];
-    for (let i = 0; i < array.length; i++) {
-        const { value, index } = array[i];
-        const ston = parseWithIndex(value, index);
+    for (const { value, index, comment } of array) {
+        const ston = parseWithIndex(value, index, comment);
         if (ston === undefined) {
             return undefined;
         }
@@ -297,11 +312,10 @@ function tempArrayToSTONArray(array) {
 }
 function tempArrayToSTONObjectValueWithIndex(array) {
     const out = {};
-    for (let i = 0; i < array.length; i++) {
-        const { value, index } = array[i];
+    for (const { value, index, comment } of array) {
         const result = value.match(/^\s*([\w-]+)/);
         if (result === null) {
-            const ston = parseWithIndex(value, index);
+            const ston = parseWithIndex(value, index, comment);
             if (ston === undefined) {
                 return undefined;
             }
@@ -314,11 +328,12 @@ function tempArrayToSTONObjectValueWithIndex(array) {
         if (valStr === '') {
             out[key] = {
                 value: true,
-                index: index + length
+                index: index + length,
+                comment
             };
         }
         else {
-            const value = parseWithIndex(valStr, index + length);
+            const value = parseWithIndex(valStr, index + length, comment);
             if (value === undefined) {
                 return undefined;
             }
@@ -421,7 +436,7 @@ function parseToValueWithIndex(string, index) {
     }
     return string;
 }
-function parseWithIndex(string, index = 0) {
+function parseWithIndex(string, index = 0, comment = '') {
     index += string.length;
     string = string.trimStart();
     index -= string.length;
@@ -431,7 +446,8 @@ function parseWithIndex(string, index = 0) {
     }
     return {
         value: value,
-        index
+        index,
+        comment
     };
 }
 exports.parseWithIndex = parseWithIndex;
@@ -469,9 +485,49 @@ exports.parse = parse;
 function stringifyString(string) {
     return "'" + string.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/(^|[^\\])\\\\(?=[^\\"'])/g, '$1\\') + "'";
 }
+function stringifyArrayWithComment(array, { indentTarget, indentLevel, addDecorativeComma }) {
+    indentTarget = indentTarget ?? 'none';
+    indentLevel = indentLevel ?? 0;
+    addDecorativeComma = addDecorativeComma ?? 'never';
+    const out = [];
+    const expand = array.length > 1
+        && (indentTarget === 'all' || indentTarget === 'array' || indentTarget === 'arrayInObjectAndThis')
+        || array.find(val => val.comment !== '') !== undefined;
+    if (indentTarget === 'arrayInObjectAndThis') {
+        indentTarget = 'arrayInObject';
+    }
+    for (let i = 0; i < array.length; i++) {
+        const { value, comment } = array[i];
+        const string = stringifyWithComment(value, { indentTarget, indentLevel: indentLevel + (expand ? 1 : 0), addDecorativeComma });
+        if ((string.endsWith("'") || string.endsWith('}') || string.endsWith(']')) && addDecorativeComma !== 'always'
+            || i === (array.length - 1) || expand) {
+            if (comment !== '') {
+                out.push(...comment.split('\n'));
+            }
+            out.push(string);
+        }
+        else {
+            out.push(string + ',');
+        }
+    }
+    let footAdd = '\n';
+    for (let i = 0; i < indentLevel; i++) {
+        footAdd += '    ';
+    }
+    let bodyAdd = footAdd;
+    if (indentLevel >= 0) {
+        bodyAdd += '    ';
+    }
+    if (expand) {
+        return '[' + bodyAdd + out.join(bodyAdd) + footAdd + ']';
+    }
+    else {
+        return '[' + out.join('') + ']';
+    }
+}
 function stringifyArray(array, { indentTarget, indentLevel, addDecorativeComma }) {
     indentTarget = indentTarget ?? 'none';
-    indentLevel = indentLevel ?? 1;
+    indentLevel = indentLevel ?? 0;
     addDecorativeComma = addDecorativeComma ?? 'never';
     const out = [];
     const expand = array.length > 1 && (indentTarget === 'all' || indentTarget === 'array' || indentTarget === 'arrayInObjectAndThis');
@@ -488,20 +544,102 @@ function stringifyArray(array, { indentTarget, indentLevel, addDecorativeComma }
             out.push(string + ',');
         }
     }
-    let add = '';
-    for (let i = 1; i < indentLevel; i++) {
-        add += '    ';
+    let footAdd = '\n';
+    for (let i = 0; i < indentLevel; i++) {
+        footAdd += '    ';
+    }
+    let bodyAdd = footAdd;
+    if (indentLevel >= 0) {
+        bodyAdd += '    ';
     }
     if (expand) {
-        return '[' + '\n    ' + add + out.join('\n    ' + add) + '\n' + add + ']';
+        return '[' + bodyAdd + out.join(bodyAdd) + footAdd + ']';
     }
     else {
         return '[' + out.join('') + ']';
     }
 }
+function stringifyObjectWithComment(object, { indentTarget, indentLevel, addDecorativeComma }) {
+    indentTarget = indentTarget ?? 'none';
+    indentLevel = indentLevel ?? 0;
+    addDecorativeComma = addDecorativeComma ?? 'never';
+    const out = [];
+    const keys = Object.keys(object);
+    let expand = keys.length > 1
+        && (indentTarget === 'all' || indentTarget === 'object');
+    if (!expand) {
+        for (const key of keys) {
+            const val = object[key];
+            if (val === undefined) {
+                continue;
+            }
+            if (val.comment !== '') {
+                expand = true;
+                break;
+            }
+        }
+    }
+    if (indentTarget === 'arrayInObject') {
+        indentTarget = 'arrayInObjectAndThis';
+    }
+    for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        const result = key.match(/^[\w-]+$/);
+        if (result === null) {
+            continue;
+        }
+        const val = object[key];
+        if (val === undefined) {
+            continue;
+        }
+        const { value, comment } = val;
+        const string = stringifyWithComment(value, { indentTarget, indentLevel: indentLevel + (expand ? 1 : 0), addDecorativeComma });
+        if (comment !== '') {
+            out.push(...comment.split('\n'));
+        }
+        if (string.startsWith("'") || string.startsWith('[') || string.startsWith('{')) {
+            if (addDecorativeComma !== 'always' && addDecorativeComma !== 'inObject' || i === (keys.length - 1) || expand) {
+                out.push((key === '__' ? '' : key) + string);
+            }
+            else {
+                out.push((key === '__' ? '' : key) + string + ',');
+            }
+        }
+        else if (string === 'true') {
+            if (i === (keys.length - 1) || expand) {
+                out.push(key);
+            }
+            else {
+                out.push(key + ',');
+            }
+        }
+        else {
+            if (i === (keys.length - 1) || expand) {
+                out.push(key + ' ' + string);
+            }
+            else {
+                out.push(key + ' ' + string + ',');
+            }
+        }
+    }
+    let footAdd = '\n';
+    for (let i = 0; i < indentLevel; i++) {
+        footAdd += '    ';
+    }
+    let bodyAdd = footAdd;
+    if (indentLevel >= 0) {
+        bodyAdd += '    ';
+    }
+    if (expand) {
+        return '{' + bodyAdd + out.join(bodyAdd) + footAdd + '}';
+    }
+    else {
+        return '{' + out.join('') + '}';
+    }
+}
 function stringifyObject(object, { indentTarget, indentLevel, addDecorativeComma }) {
     indentTarget = indentTarget ?? 'none';
-    indentLevel = indentLevel ?? 1;
+    indentLevel = indentLevel ?? 0;
     addDecorativeComma = addDecorativeComma ?? 'never';
     const out = [];
     const keys = Object.keys(object);
@@ -516,6 +654,9 @@ function stringifyObject(object, { indentTarget, indentLevel, addDecorativeComma
             continue;
         }
         const value = object[key];
+        if (value === undefined) {
+            continue;
+        }
         const string = stringify(value, { indentTarget, indentLevel: indentLevel + (expand ? 1 : 0), addDecorativeComma });
         if (string.startsWith("'") || string.startsWith('[') || string.startsWith('{')) {
             if (addDecorativeComma !== 'always' && addDecorativeComma !== 'inObject' || i === (keys.length - 1) || expand) {
@@ -542,17 +683,43 @@ function stringifyObject(object, { indentTarget, indentLevel, addDecorativeComma
             }
         }
     }
-    let add = '';
-    for (let i = 1; i < indentLevel; i++) {
-        add += '    ';
+    let footAdd = '\n';
+    for (let i = 0; i < indentLevel; i++) {
+        footAdd += '    ';
+    }
+    let bodyAdd = footAdd;
+    if (indentLevel >= 0) {
+        bodyAdd += '    ';
     }
     if (expand) {
-        return '{' + '\n    ' + add + out.join('\n    ' + add) + '\n' + add + '}';
+        return '{' + bodyAdd + out.join(bodyAdd) + footAdd + '}';
     }
     else {
         return '{' + out.join('') + '}';
     }
 }
+function stringifyWithComment(ston, beautifyOptions = {}) {
+    if (ston === undefined) {
+        return '';
+    }
+    if (typeof ston === 'number') {
+        return ston.toString();
+    }
+    if (typeof ston === 'string') {
+        return stringifyString(ston);
+    }
+    if (ston === true) {
+        return 'true';
+    }
+    if (ston === false) {
+        return 'false';
+    }
+    if (Array.isArray(ston)) {
+        return stringifyArrayWithComment(ston, beautifyOptions);
+    }
+    return stringifyObjectWithComment(ston, beautifyOptions);
+}
+exports.stringifyWithComment = stringifyWithComment;
 function stringify(ston, beautifyOptions = {}) {
     if (ston === undefined) {
         return '';
