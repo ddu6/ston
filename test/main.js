@@ -23,4 +23,4 @@ const example=`{
 }`
 console.log(ston.stringify(ston.parse(example),{indentTarget:'object'}))
 console.log(ston.stringify(ston.parseWithIndex(example),{indentTarget:'object'}))
-console.log(ston.stringifyWithComment(ston.parseWithIndex(example).value))
+console.log(ston.stringifyWithComment(ston.parseWithIndex(example).value,{addDecorativeSpace:'always'}))

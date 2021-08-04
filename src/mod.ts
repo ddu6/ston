@@ -502,8 +502,9 @@ export interface BeautifyOptions{
     indentTarget?:'none'|'all'|'array'|'object'|'arrayInObject'|'arrayInObjectAndThis'
     indentLevel?:number
     addDecorativeComma?:'never'|'always'|'inObject'
+    addDecorativeSpace?:'never'|'always'|'afterKey'|'afterComma'
 }
-function stringifyArrayWithComment(array:STONArrayValueWithIndex,{indentTarget,indentLevel,addDecorativeComma}:BeautifyOptions){
+function stringifyArrayWithComment(array:STONArrayValueWithIndex,{indentTarget,indentLevel,addDecorativeComma,addDecorativeSpace}:BeautifyOptions){
     indentTarget=indentTarget??'none'
     indentLevel=indentLevel??0
     addDecorativeComma=addDecorativeComma??'never'
@@ -514,9 +515,10 @@ function stringifyArrayWithComment(array:STONArrayValueWithIndex,{indentTarget,i
     if(indentTarget==='arrayInObjectAndThis'){
         indentTarget='arrayInObject'
     }
+    const comma=addDecorativeSpace==='always'||addDecorativeSpace==='afterComma'?', ':','
     for(let i=0;i<array.length;i++){
         const {value,comment}=array[i]
-        const string=stringifyWithComment(value,{indentTarget,indentLevel:indentLevel+(expand?1:0),addDecorativeComma})
+        const string=stringifyWithComment(value,{indentTarget,indentLevel:indentLevel+(expand?1:0),addDecorativeComma,addDecorativeSpace})
         if(
             (string.endsWith("'")||string.endsWith('}')||string.endsWith(']'))&&addDecorativeComma!=='always'
             ||i===(array.length-1)||expand
@@ -526,7 +528,7 @@ function stringifyArrayWithComment(array:STONArrayValueWithIndex,{indentTarget,i
             }
             out.push(string)
         }else{
-            out.push(string+',')
+            out.push(string+comma)
         }
     }
     let footAdd='\n'
@@ -540,10 +542,13 @@ function stringifyArrayWithComment(array:STONArrayValueWithIndex,{indentTarget,i
     if(expand){
         return '['+bodyAdd+out.join(bodyAdd)+footAdd+']'
     }else{
+        if(addDecorativeSpace==='always'&&out.length>0){
+            return '[ '+out.join('')+' ]'
+        }
         return '['+out.join('')+']'
     }
 }
-function stringifyArray(array:STONArray,{indentTarget,indentLevel,addDecorativeComma}:BeautifyOptions){
+function stringifyArray(array:STONArray,{indentTarget,indentLevel,addDecorativeComma,addDecorativeSpace}:BeautifyOptions){
     indentTarget=indentTarget??'none'
     indentLevel=indentLevel??0
     addDecorativeComma=addDecorativeComma??'never'
@@ -552,15 +557,16 @@ function stringifyArray(array:STONArray,{indentTarget,indentLevel,addDecorativeC
     if(indentTarget==='arrayInObjectAndThis'){
         indentTarget='arrayInObject'
     }
+    const comma=addDecorativeSpace==='always'||addDecorativeSpace==='afterComma'?', ':','
     for(let i=0;i<array.length;i++){
-        const string=stringify(array[i],{indentTarget,indentLevel:indentLevel+(expand?1:0),addDecorativeComma})
+        const string=stringify(array[i],{indentTarget,indentLevel:indentLevel+(expand?1:0),addDecorativeComma,addDecorativeSpace})
         if(
             (string.endsWith("'")||string.endsWith('}')||string.endsWith(']'))&&addDecorativeComma!=='always'
             ||i===(array.length-1)||expand
         ){
             out.push(string)
         }else{
-            out.push(string+',')
+            out.push(string+comma)
         }
     }
     let footAdd='\n'
@@ -574,10 +580,13 @@ function stringifyArray(array:STONArray,{indentTarget,indentLevel,addDecorativeC
     if(expand){
         return '['+bodyAdd+out.join(bodyAdd)+footAdd+']'
     }else{
+        if(addDecorativeSpace==='always'&&out.length>0){
+            return '[ '+out.join('')+' ]'
+        }
         return '['+out.join('')+']'
     }
 }
-function stringifyObjectWithComment(object:STONObjectValueWithIndex,{indentTarget,indentLevel,addDecorativeComma}:BeautifyOptions){
+function stringifyObjectWithComment(object:STONObjectValueWithIndex,{indentTarget,indentLevel,addDecorativeComma,addDecorativeSpace}:BeautifyOptions){
     indentTarget=indentTarget??'none'
     indentLevel=indentLevel??0
     addDecorativeComma=addDecorativeComma??'never'
@@ -600,6 +609,8 @@ function stringifyObjectWithComment(object:STONObjectValueWithIndex,{indentTarge
     if(indentTarget==='arrayInObject'){
         indentTarget='arrayInObjectAndThis'
     }
+    const comma=addDecorativeSpace==='always'||addDecorativeSpace==='afterComma'?', ':','
+    const spaceAfterKey=addDecorativeSpace==='always'||addDecorativeSpace==='afterKey'?' ':''
     for(let i=0;i<keys.length;i++){
         const key=keys[i]
         const result=key.match(/^[\w-]+$/)
@@ -611,27 +622,27 @@ function stringifyObjectWithComment(object:STONObjectValueWithIndex,{indentTarge
             continue
         }
         const {value,comment}=val
-        const string=stringifyWithComment(value,{indentTarget,indentLevel:indentLevel+(expand?1:0),addDecorativeComma})
+        const string=stringifyWithComment(value,{indentTarget,indentLevel:indentLevel+(expand?1:0),addDecorativeComma,addDecorativeSpace})
         if(comment!==''){
             out.push(...comment.split('\n'))
         }
         if(string.startsWith("'")||string.startsWith('[')||string.startsWith('{')){
             if(addDecorativeComma!=='always'&&addDecorativeComma!=='inObject'||i===(keys.length-1)||expand){
-                out.push((key==='__'?'':key)+string)
+                out.push((key==='__'?'':key+spaceAfterKey)+string)
             }else{
-                out.push((key==='__'?'':key)+string+',')
+                out.push((key==='__'?'':key+spaceAfterKey)+string+comma)
             }
         }else if(string==='true'){
             if(i===(keys.length-1)||expand){
                 out.push(key)
             }else{
-                out.push(key+',')
+                out.push(key+comma)
             }
         }else{
             if(i===(keys.length-1)||expand){
                 out.push(key+' '+string)
             }else{
-                out.push(key+' '+string+',')
+                out.push(key+' '+string+comma)
             }
         }
     }
@@ -646,10 +657,13 @@ function stringifyObjectWithComment(object:STONObjectValueWithIndex,{indentTarge
     if(expand){
         return '{'+bodyAdd+out.join(bodyAdd)+footAdd+'}'
     }else{
+        if(addDecorativeSpace==='always'&&out.length>0){
+            return '{ '+out.join('')+' }'
+        }
         return '{'+out.join('')+'}'
     }
 }
-function stringifyObject(object:STONObject,{indentTarget,indentLevel,addDecorativeComma}:BeautifyOptions){
+function stringifyObject(object:STONObject,{indentTarget,indentLevel,addDecorativeComma,addDecorativeSpace}:BeautifyOptions){
     indentTarget=indentTarget??'none'
     indentLevel=indentLevel??0
     addDecorativeComma=addDecorativeComma??'never'
@@ -659,6 +673,8 @@ function stringifyObject(object:STONObject,{indentTarget,indentLevel,addDecorati
     if(indentTarget==='arrayInObject'){
         indentTarget='arrayInObjectAndThis'
     }
+    const comma=addDecorativeSpace==='always'||addDecorativeSpace==='afterComma'?', ':','
+    const spaceAfterKey=addDecorativeSpace==='always'||addDecorativeSpace==='afterKey'?' ':''
     for(let i=0;i<keys.length;i++){
         const key=keys[i]
         const result=key.match(/^[\w-]+$/)
@@ -669,24 +685,24 @@ function stringifyObject(object:STONObject,{indentTarget,indentLevel,addDecorati
         if(value===undefined){
             continue
         }
-        const string=stringify(value,{indentTarget,indentLevel:indentLevel+(expand?1:0),addDecorativeComma})
+        const string=stringify(value,{indentTarget,indentLevel:indentLevel+(expand?1:0),addDecorativeComma,addDecorativeSpace})
         if(string.startsWith("'")||string.startsWith('[')||string.startsWith('{')){
             if(addDecorativeComma!=='always'&&addDecorativeComma!=='inObject'||i===(keys.length-1)||expand){
-                out.push((key==='__'?'':key)+string)
+                out.push((key==='__'?'':key+spaceAfterKey)+string)
             }else{
-                out.push((key==='__'?'':key)+string+',')
+                out.push((key==='__'?'':key+spaceAfterKey)+string+comma)
             }
         }else if(string==='true'){
             if(i===(keys.length-1)||expand){
                 out.push(key)
             }else{
-                out.push(key+',')
+                out.push(key+comma)
             }
         }else{
             if(i===(keys.length-1)||expand){
                 out.push(key+' '+string)
             }else{
-                out.push(key+' '+string+',')
+                out.push(key+' '+string+comma)
             }
         }
     }
@@ -701,6 +717,9 @@ function stringifyObject(object:STONObject,{indentTarget,indentLevel,addDecorati
     if(expand){
         return '{'+bodyAdd+out.join(bodyAdd)+footAdd+'}'
     }else{
+        if(addDecorativeSpace==='always'&&out.length>0){
+            return '{ '+out.join('')+' }'
+        }
         return '{'+out.join('')+'}'
     }
 }
