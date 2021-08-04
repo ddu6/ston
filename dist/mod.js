@@ -522,12 +522,7 @@ function stringifyArrayWithComment(array, { indentTarget, indentLevel, addDecora
     if (expand) {
         return '[' + bodyAdd + out.join(bodyAdd) + footAdd + ']';
     }
-    else {
-        if (addDecorativeSpace === 'always' && out.length > 0) {
-            return '[ ' + out.join('') + ' ]';
-        }
-        return '[' + out.join('') + ']';
-    }
+    return '[' + out.join('') + ']';
 }
 function stringifyArray(array, { indentTarget, indentLevel, addDecorativeComma, addDecorativeSpace }) {
     indentTarget = indentTarget ?? 'none';
@@ -560,12 +555,7 @@ function stringifyArray(array, { indentTarget, indentLevel, addDecorativeComma, 
     if (expand) {
         return '[' + bodyAdd + out.join(bodyAdd) + footAdd + ']';
     }
-    else {
-        if (addDecorativeSpace === 'always' && out.length > 0) {
-            return '[ ' + out.join('') + ' ]';
-        }
-        return '[' + out.join('') + ']';
-    }
+    return '[' + out.join('') + ']';
 }
 function stringifyObjectWithComment(object, { indentTarget, indentLevel, addDecorativeComma, addDecorativeSpace }) {
     indentTarget = indentTarget ?? 'none';
@@ -643,12 +633,7 @@ function stringifyObjectWithComment(object, { indentTarget, indentLevel, addDeco
     if (expand) {
         return '{' + bodyAdd + out.join(bodyAdd) + footAdd + '}';
     }
-    else {
-        if (addDecorativeSpace === 'always' && out.length > 0) {
-            return '{ ' + out.join('') + ' }';
-        }
-        return '{' + out.join('') + '}';
-    }
+    return '{' + out.join('') + '}';
 }
 function stringifyObject(object, { indentTarget, indentLevel, addDecorativeComma, addDecorativeSpace }) {
     indentTarget = indentTarget ?? 'none';
@@ -709,12 +694,7 @@ function stringifyObject(object, { indentTarget, indentLevel, addDecorativeComma
     if (expand) {
         return '{' + bodyAdd + out.join(bodyAdd) + footAdd + '}';
     }
-    else {
-        if (addDecorativeSpace === 'always' && out.length > 0) {
-            return '{ ' + out.join('') + ' }';
-        }
-        return '{' + out.join('') + '}';
-    }
+    return '{' + out.join('') + '}';
 }
 function stringifyWithComment(ston, beautifyOptions = {}) {
     if (ston === undefined) {

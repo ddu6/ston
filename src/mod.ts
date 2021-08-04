@@ -541,12 +541,8 @@ function stringifyArrayWithComment(array:STONArrayValueWithIndex,{indentTarget,i
     }
     if(expand){
         return '['+bodyAdd+out.join(bodyAdd)+footAdd+']'
-    }else{
-        if(addDecorativeSpace==='always'&&out.length>0){
-            return '[ '+out.join('')+' ]'
-        }
-        return '['+out.join('')+']'
     }
+    return '['+out.join('')+']'
 }
 function stringifyArray(array:STONArray,{indentTarget,indentLevel,addDecorativeComma,addDecorativeSpace}:BeautifyOptions){
     indentTarget=indentTarget??'none'
@@ -579,12 +575,8 @@ function stringifyArray(array:STONArray,{indentTarget,indentLevel,addDecorativeC
     }
     if(expand){
         return '['+bodyAdd+out.join(bodyAdd)+footAdd+']'
-    }else{
-        if(addDecorativeSpace==='always'&&out.length>0){
-            return '[ '+out.join('')+' ]'
-        }
-        return '['+out.join('')+']'
     }
+    return '['+out.join('')+']'
 }
 function stringifyObjectWithComment(object:STONObjectValueWithIndex,{indentTarget,indentLevel,addDecorativeComma,addDecorativeSpace}:BeautifyOptions){
     indentTarget=indentTarget??'none'
@@ -656,12 +648,8 @@ function stringifyObjectWithComment(object:STONObjectValueWithIndex,{indentTarge
     }
     if(expand){
         return '{'+bodyAdd+out.join(bodyAdd)+footAdd+'}'
-    }else{
-        if(addDecorativeSpace==='always'&&out.length>0){
-            return '{ '+out.join('')+' }'
-        }
-        return '{'+out.join('')+'}'
     }
+    return '{'+out.join('')+'}'
 }
 function stringifyObject(object:STONObject,{indentTarget,indentLevel,addDecorativeComma,addDecorativeSpace}:BeautifyOptions){
     indentTarget=indentTarget??'none'
@@ -716,12 +704,8 @@ function stringifyObject(object:STONObject,{indentTarget,indentLevel,addDecorati
     }
     if(expand){
         return '{'+bodyAdd+out.join(bodyAdd)+footAdd+'}'
-    }else{
-        if(addDecorativeSpace==='always'&&out.length>0){
-            return '{ '+out.join('')+' }'
-        }
-        return '{'+out.join('')+'}'
     }
+    return '{'+out.join('')+'}'
 }
 export function stringifyWithComment(ston:STONValueWithIndex|undefined,beautifyOptions:BeautifyOptions={}){
     if(ston===undefined){
