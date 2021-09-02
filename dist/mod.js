@@ -482,7 +482,16 @@ function parse(string) {
     return string;
 }
 exports.parse = parse;
-function stringifyString(string) {
+function stringifyString(string, useUnquotedString) {
+    if (useUnquotedString) {
+        if (string.length > 0
+            && string[0].trim().length > 0
+            && (string.length === 1
+                || string[string.length - 1].trim().length > 0
+                    && !/[',{}\[\]\n\r]/.test(string))) {
+            return string;
+        }
+    }
     return "'" + string.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/(^|[^\\])\\\\(?=[^\\"'])/g, '$1\\') + "'";
 }
 function stringifyArrayWithComment(array, { indentTarget, indentLevel, addDecorativeComma, addDecorativeSpace }) {
@@ -704,7 +713,7 @@ function stringifyWithComment(ston, beautifyOptions = {}) {
         return ston.toString();
     }
     if (typeof ston === 'string') {
-        return stringifyString(ston);
+        return stringifyString(ston, beautifyOptions.useUnquotedString);
     }
     if (ston === true) {
         return 'true';
@@ -726,7 +735,7 @@ function stringify(ston, beautifyOptions = {}) {
         return ston.toString();
     }
     if (typeof ston === 'string') {
-        return stringifyString(ston);
+        return stringifyString(ston, beautifyOptions.useUnquotedString);
     }
     if (ston === true) {
         return 'true';

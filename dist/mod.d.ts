@@ -25,6 +25,7 @@ export interface BeautifyOptions {
     indentLevel?: number;
     addDecorativeComma?: 'never' | 'always' | 'inObject';
     addDecorativeSpace?: 'never' | 'always' | 'afterKey' | 'afterComma';
+    useUnquotedString?: true;
 }
 export declare function stringifyWithComment(ston: STONValueWithIndex | undefined, beautifyOptions?: BeautifyOptions): string;
 export declare function stringify(ston: STON | undefined, beautifyOptions?: BeautifyOptions): string;

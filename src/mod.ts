@@ -495,7 +495,20 @@ export function parse(string:string):STON|undefined{
     }
     return string
 }
-function stringifyString(string:string){
+function stringifyString(string:string,useUnquotedString?:true){
+    if(useUnquotedString){
+        if(
+            string.length>0
+            &&string[0].trim().length>0
+            &&(
+                string.length===1
+                ||string[string.length-1].trim().length>0
+                &&!/[',{}\[\]\n\r]/.test(string)
+            )
+        ){
+            return string
+        }
+    }
     return "'"+string.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/(^|[^\\])\\\\(?=[^\\"'])/g,'$1\\')+"'"
 }
 export interface BeautifyOptions{
@@ -503,6 +516,7 @@ export interface BeautifyOptions{
     indentLevel?:number
     addDecorativeComma?:'never'|'always'|'inObject'
     addDecorativeSpace?:'never'|'always'|'afterKey'|'afterComma'
+    useUnquotedString?:true
 }
 function stringifyArrayWithComment(array:STONArrayValueWithIndex,{indentTarget,indentLevel,addDecorativeComma,addDecorativeSpace}:BeautifyOptions){
     indentTarget=indentTarget??'none'
@@ -715,7 +729,7 @@ export function stringifyWithComment(ston:STONValueWithIndex|undefined,beautifyO
         return ston.toString()
     }
     if(typeof ston==='string'){
-        return stringifyString(ston)
+        return stringifyString(ston,beautifyOptions.useUnquotedString)
     }
     if(ston===true){
         return 'true'
@@ -736,7 +750,7 @@ export function stringify(ston:STON|undefined,beautifyOptions:BeautifyOptions={}
         return ston.toString()
     }
     if(typeof ston==='string'){
-        return stringifyString(ston)
+        return stringifyString(ston,beautifyOptions.useUnquotedString)
     }
     if(ston===true){
         return 'true'
