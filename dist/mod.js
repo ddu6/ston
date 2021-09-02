@@ -487,14 +487,14 @@ function stringifyString(string, useUnquotedString) {
         if (string.length > 0
             && string[0].trim().length > 0
             && (string.length === 1
-                || string[string.length - 1].trim().length > 0
-                    && !/[',{}\[\]\n\r]/.test(string))) {
+                || string[string.length - 1].trim().length > 0)
+            && !/[',{}\[\]\n\r]/.test(string)) {
             return string;
         }
     }
     return "'" + string.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/(^|[^\\])\\\\(?=[^\\"'])/g, '$1\\') + "'";
 }
-function stringifyArrayWithComment(array, { indentTarget, indentLevel, addDecorativeComma, addDecorativeSpace }) {
+function stringifyArrayWithComment(array, { indentTarget, indentLevel, addDecorativeComma, addDecorativeSpace, useUnquotedString }) {
     indentTarget = indentTarget ?? 'none';
     indentLevel = indentLevel ?? 0;
     addDecorativeComma = addDecorativeComma ?? 'never';
@@ -508,7 +508,13 @@ function stringifyArrayWithComment(array, { indentTarget, indentLevel, addDecora
     const comma = addDecorativeSpace === 'always' || addDecorativeSpace === 'afterComma' ? ', ' : ',';
     for (let i = 0; i < array.length; i++) {
         const { value, comment } = array[i];
-        const string = stringifyWithComment(value, { indentTarget, indentLevel: indentLevel + (expand ? 1 : 0), addDecorativeComma, addDecorativeSpace });
+        const string = stringifyWithComment(value, {
+            indentTarget,
+            indentLevel: indentLevel + (expand ? 1 : 0),
+            addDecorativeComma,
+            addDecorativeSpace,
+            useUnquotedString,
+        });
         if ((string.endsWith("'") || string.endsWith('}') || string.endsWith(']')) && addDecorativeComma !== 'always'
             || i === (array.length - 1) || expand) {
             if (comment !== '') {
@@ -533,7 +539,7 @@ function stringifyArrayWithComment(array, { indentTarget, indentLevel, addDecora
     }
     return '[' + out.join('') + ']';
 }
-function stringifyArray(array, { indentTarget, indentLevel, addDecorativeComma, addDecorativeSpace }) {
+function stringifyArray(array, { indentTarget, indentLevel, addDecorativeComma, addDecorativeSpace, useUnquotedString }) {
     indentTarget = indentTarget ?? 'none';
     indentLevel = indentLevel ?? 0;
     addDecorativeComma = addDecorativeComma ?? 'never';
@@ -544,7 +550,13 @@ function stringifyArray(array, { indentTarget, indentLevel, addDecorativeComma, 
     }
     const comma = addDecorativeSpace === 'always' || addDecorativeSpace === 'afterComma' ? ', ' : ',';
     for (let i = 0; i < array.length; i++) {
-        const string = stringify(array[i], { indentTarget, indentLevel: indentLevel + (expand ? 1 : 0), addDecorativeComma, addDecorativeSpace });
+        const string = stringify(array[i], {
+            indentTarget,
+            indentLevel: indentLevel + (expand ? 1 : 0),
+            addDecorativeComma,
+            addDecorativeSpace,
+            useUnquotedString,
+        });
         if ((string.endsWith("'") || string.endsWith('}') || string.endsWith(']')) && addDecorativeComma !== 'always'
             || i === (array.length - 1) || expand) {
             out.push(string);
@@ -566,7 +578,7 @@ function stringifyArray(array, { indentTarget, indentLevel, addDecorativeComma, 
     }
     return '[' + out.join('') + ']';
 }
-function stringifyObjectWithComment(object, { indentTarget, indentLevel, addDecorativeComma, addDecorativeSpace }) {
+function stringifyObjectWithComment(object, { indentTarget, indentLevel, addDecorativeComma, addDecorativeSpace, useUnquotedString }) {
     indentTarget = indentTarget ?? 'none';
     indentLevel = indentLevel ?? 0;
     addDecorativeComma = addDecorativeComma ?? 'never';
@@ -602,7 +614,13 @@ function stringifyObjectWithComment(object, { indentTarget, indentLevel, addDeco
             continue;
         }
         const { value, comment } = val;
-        const string = stringifyWithComment(value, { indentTarget, indentLevel: indentLevel + (expand ? 1 : 0), addDecorativeComma, addDecorativeSpace });
+        const string = stringifyWithComment(value, {
+            indentTarget,
+            indentLevel: indentLevel + (expand ? 1 : 0),
+            addDecorativeComma,
+            addDecorativeSpace,
+            useUnquotedString: key === '__' ? undefined : useUnquotedString,
+        });
         if (comment !== '') {
             out.push(...comment.split('\n'));
         }
@@ -644,7 +662,7 @@ function stringifyObjectWithComment(object, { indentTarget, indentLevel, addDeco
     }
     return '{' + out.join('') + '}';
 }
-function stringifyObject(object, { indentTarget, indentLevel, addDecorativeComma, addDecorativeSpace }) {
+function stringifyObject(object, { indentTarget, indentLevel, addDecorativeComma, addDecorativeSpace, useUnquotedString }) {
     indentTarget = indentTarget ?? 'none';
     indentLevel = indentLevel ?? 0;
     addDecorativeComma = addDecorativeComma ?? 'never';
@@ -666,7 +684,13 @@ function stringifyObject(object, { indentTarget, indentLevel, addDecorativeComma
         if (value === undefined) {
             continue;
         }
-        const string = stringify(value, { indentTarget, indentLevel: indentLevel + (expand ? 1 : 0), addDecorativeComma, addDecorativeSpace });
+        const string = stringify(value, {
+            indentTarget,
+            indentLevel: indentLevel + (expand ? 1 : 0),
+            addDecorativeComma,
+            addDecorativeSpace,
+            useUnquotedString: key === '__' ? undefined : useUnquotedString,
+        });
         if (string.startsWith("'") || string.startsWith('[') || string.startsWith('{')) {
             if (addDecorativeComma !== 'always' && addDecorativeComma !== 'inObject' || i === (keys.length - 1) || expand) {
                 out.push((key === '__' ? '' : key + spaceAfterKey) + string);

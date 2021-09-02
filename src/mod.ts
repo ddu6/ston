@@ -495,6 +495,13 @@ export function parse(string:string):STON|undefined{
     }
     return string
 }
+export interface BeautifyOptions{
+    indentTarget?:'none'|'all'|'array'|'object'|'arrayInObject'|'arrayInObjectAndThis'
+    indentLevel?:number
+    addDecorativeComma?:'never'|'always'|'inObject'
+    addDecorativeSpace?:'never'|'always'|'afterKey'|'afterComma'
+    useUnquotedString?:true
+}
 function stringifyString(string:string,useUnquotedString?:true){
     if(useUnquotedString){
         if(
@@ -503,22 +510,15 @@ function stringifyString(string:string,useUnquotedString?:true){
             &&(
                 string.length===1
                 ||string[string.length-1].trim().length>0
-                &&!/[',{}\[\]\n\r]/.test(string)
             )
+            &&!/[',{}\[\]\n\r]/.test(string)
         ){
             return string
         }
     }
     return "'"+string.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/(^|[^\\])\\\\(?=[^\\"'])/g,'$1\\')+"'"
 }
-export interface BeautifyOptions{
-    indentTarget?:'none'|'all'|'array'|'object'|'arrayInObject'|'arrayInObjectAndThis'
-    indentLevel?:number
-    addDecorativeComma?:'never'|'always'|'inObject'
-    addDecorativeSpace?:'never'|'always'|'afterKey'|'afterComma'
-    useUnquotedString?:true
-}
-function stringifyArrayWithComment(array:STONArrayValueWithIndex,{indentTarget,indentLevel,addDecorativeComma,addDecorativeSpace}:BeautifyOptions){
+function stringifyArrayWithComment(array:STONArrayValueWithIndex,{indentTarget,indentLevel,addDecorativeComma,addDecorativeSpace,useUnquotedString}:BeautifyOptions){
     indentTarget=indentTarget??'none'
     indentLevel=indentLevel??0
     addDecorativeComma=addDecorativeComma??'never'
@@ -532,7 +532,13 @@ function stringifyArrayWithComment(array:STONArrayValueWithIndex,{indentTarget,i
     const comma=addDecorativeSpace==='always'||addDecorativeSpace==='afterComma'?', ':','
     for(let i=0;i<array.length;i++){
         const {value,comment}=array[i]
-        const string=stringifyWithComment(value,{indentTarget,indentLevel:indentLevel+(expand?1:0),addDecorativeComma,addDecorativeSpace})
+        const string=stringifyWithComment(value,{
+            indentTarget,
+            indentLevel:indentLevel+(expand?1:0),
+            addDecorativeComma,
+            addDecorativeSpace,
+            useUnquotedString,
+        })
         if(
             (string.endsWith("'")||string.endsWith('}')||string.endsWith(']'))&&addDecorativeComma!=='always'
             ||i===(array.length-1)||expand
@@ -558,7 +564,7 @@ function stringifyArrayWithComment(array:STONArrayValueWithIndex,{indentTarget,i
     }
     return '['+out.join('')+']'
 }
-function stringifyArray(array:STONArray,{indentTarget,indentLevel,addDecorativeComma,addDecorativeSpace}:BeautifyOptions){
+function stringifyArray(array:STONArray,{indentTarget,indentLevel,addDecorativeComma,addDecorativeSpace,useUnquotedString}:BeautifyOptions){
     indentTarget=indentTarget??'none'
     indentLevel=indentLevel??0
     addDecorativeComma=addDecorativeComma??'never'
@@ -569,7 +575,13 @@ function stringifyArray(array:STONArray,{indentTarget,indentLevel,addDecorativeC
     }
     const comma=addDecorativeSpace==='always'||addDecorativeSpace==='afterComma'?', ':','
     for(let i=0;i<array.length;i++){
-        const string=stringify(array[i],{indentTarget,indentLevel:indentLevel+(expand?1:0),addDecorativeComma,addDecorativeSpace})
+        const string=stringify(array[i],{
+            indentTarget,
+            indentLevel:indentLevel+(expand?1:0),
+            addDecorativeComma,
+            addDecorativeSpace,
+            useUnquotedString,
+        })
         if(
             (string.endsWith("'")||string.endsWith('}')||string.endsWith(']'))&&addDecorativeComma!=='always'
             ||i===(array.length-1)||expand
@@ -592,7 +604,7 @@ function stringifyArray(array:STONArray,{indentTarget,indentLevel,addDecorativeC
     }
     return '['+out.join('')+']'
 }
-function stringifyObjectWithComment(object:STONObjectValueWithIndex,{indentTarget,indentLevel,addDecorativeComma,addDecorativeSpace}:BeautifyOptions){
+function stringifyObjectWithComment(object:STONObjectValueWithIndex,{indentTarget,indentLevel,addDecorativeComma,addDecorativeSpace,useUnquotedString}:BeautifyOptions){
     indentTarget=indentTarget??'none'
     indentLevel=indentLevel??0
     addDecorativeComma=addDecorativeComma??'never'
@@ -628,7 +640,13 @@ function stringifyObjectWithComment(object:STONObjectValueWithIndex,{indentTarge
             continue
         }
         const {value,comment}=val
-        const string=stringifyWithComment(value,{indentTarget,indentLevel:indentLevel+(expand?1:0),addDecorativeComma,addDecorativeSpace})
+        const string=stringifyWithComment(value,{
+            indentTarget,
+            indentLevel:indentLevel+(expand?1:0),
+            addDecorativeComma,
+            addDecorativeSpace,
+            useUnquotedString:key==='__'?undefined:useUnquotedString,
+        })
         if(comment!==''){
             out.push(...comment.split('\n'))
         }
@@ -665,7 +683,7 @@ function stringifyObjectWithComment(object:STONObjectValueWithIndex,{indentTarge
     }
     return '{'+out.join('')+'}'
 }
-function stringifyObject(object:STONObject,{indentTarget,indentLevel,addDecorativeComma,addDecorativeSpace}:BeautifyOptions){
+function stringifyObject(object:STONObject,{indentTarget,indentLevel,addDecorativeComma,addDecorativeSpace,useUnquotedString}:BeautifyOptions){
     indentTarget=indentTarget??'none'
     indentLevel=indentLevel??0
     addDecorativeComma=addDecorativeComma??'never'
@@ -687,7 +705,13 @@ function stringifyObject(object:STONObject,{indentTarget,indentLevel,addDecorati
         if(value===undefined){
             continue
         }
-        const string=stringify(value,{indentTarget,indentLevel:indentLevel+(expand?1:0),addDecorativeComma,addDecorativeSpace})
+        const string=stringify(value,{
+            indentTarget,
+            indentLevel:indentLevel+(expand?1:0),
+            addDecorativeComma,
+            addDecorativeSpace,
+            useUnquotedString:key==='__'?undefined:useUnquotedString,
+        })
         if(string.startsWith("'")||string.startsWith('[')||string.startsWith('{')){
             if(addDecorativeComma!=='always'&&addDecorativeComma!=='inObject'||i===(keys.length-1)||expand){
                 out.push((key==='__'?'':key+spaceAfterKey)+string)
