@@ -10,16 +10,8 @@ const example=`{
      */
     'standalone-value'
 }`
-console.log(ston.stringify(ston.parse(example),{
+console.log(ston.stringifyWithComment(ston.parseWithIndex(example).value,{
     indentTarget:'all',
     useUnquotedString:true,
-}))
-
-/* output
-{
-    key value
-    standalone-key
-    'standalone-value'
-}
-*/
+})===example)
 ```

@@ -14,9 +14,9 @@ console.log(ston.stringify(ston.parse(example),{
 }))
 console.log(ston.stringify(ston.parseWithIndex(example),{
     indentTarget:'all',
+    addDecorativeSpace:'always',
 }))
 console.log(ston.stringifyWithComment(ston.parseWithIndex(example).value,{
     indentTarget:'all',
-    addDecorativeSpace:'always',
     useUnquotedString:true,
-}))
+})===example)
