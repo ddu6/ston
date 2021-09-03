@@ -648,7 +648,7 @@ function stringifyObjectWithComment(object:STONObjectValueWithIndex,{indentTarge
             indentLevel:indentLevel+(expand?1:0),
             addDecorativeComma,
             addDecorativeSpace,
-            useUnquotedString:key==='__'?undefined:useUnquotedString,
+            useUnquotedString:key==='__'&&(typeof value==='string')?undefined:useUnquotedString,
         })
         if(comment!==''){
             out.push(...comment.split('\n'))
@@ -713,7 +713,7 @@ function stringifyObject(object:STONObject,{indentTarget,indentLevel,addDecorati
             indentLevel:indentLevel+(expand?1:0),
             addDecorativeComma,
             addDecorativeSpace,
-            useUnquotedString:key==='__'?undefined:useUnquotedString,
+            useUnquotedString:key==='__'&&(typeof value==='string')?undefined:useUnquotedString,
         })
         if(string.startsWith("'")||string.startsWith('[')||string.startsWith('{')){
             if(addDecorativeComma!=='always'&&addDecorativeComma!=='inObject'||i===(keys.length-1)||expand){
