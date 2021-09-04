@@ -1,6 +1,6 @@
 {
   "name": "ston",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "description": "Simple Text Object Notation",
   "main": "dist/mod.js",
   "scripts": {
