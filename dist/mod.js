@@ -491,7 +491,9 @@ function stringifyString(string, useUnquotedString) {
             && !/[',{}\[\]\n\r]/.test(string)
             && string !== 'true'
             && string !== 'false'
-            && !/^(?:[+-]?Infinity|NaN|0x[\da-fA-F]+|0o[0-7]+|0b[01]+|[+-]?(?:\d*\.?\d+|\d+\.)(?:e[+-]?\d+)?)$/.test(string)) {
+            && !/^(?:[+-]?Infinity|NaN|0x[\da-fA-F]+|0o[0-7]+|0b[01]+|[+-]?(?:\d*\.?\d+|\d+\.)(?:e[+-]?\d+)?)$/.test(string)
+            && !string.startsWith('//')
+            && !string.startsWith('/*')) {
             return string;
         }
     }
