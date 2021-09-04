@@ -7,6 +7,7 @@ const example=`{
      default key is __
      */
     'standalone-value'
+    escape '\\pi\\\\\\pi]\\\\'
 }`
 console.log(ston.stringify(ston.parse(example),{
     indentTarget:'all',
@@ -18,5 +19,6 @@ console.log(ston.stringify(ston.parseWithIndex(example),{
 }))
 console.log(ston.stringifyWithComment(ston.parseWithIndex(example).value,{
     indentTarget:'all',
+    addDecorativeSpace:'always',
     useUnquotedString:true,
 })===example)
