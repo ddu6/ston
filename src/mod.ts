@@ -18,7 +18,7 @@ export interface StringWithIndex{
     index:number
     comment:string
 }
-function splitToArrayWithIndex(string:string,index:number,keepKey=false){
+function splitToTmpArrayWithIndex(string:string,index:number,keepKey=false){
     let count=0
     let quote=false
     let escape=false
@@ -180,7 +180,7 @@ function splitToArrayWithIndex(string:string,index:number,keepKey=false){
     }
     return array
 }
-function splitToArray(string:string,keepKey=false){
+function splitToTmpArray(string:string,keepKey=false){
     let count=0
     let quote=false
     let escape=false
@@ -305,7 +305,7 @@ function splitToArray(string:string,keepKey=false){
     }
     return array
 }
-function tempArrayToSTONArrayValueWithIndex(array:StringWithIndex[]){
+function tmpArrayToSTONArrayValueWithIndex(array:StringWithIndex[]){
     const out:STONArrayValueWithIndex=[]
     for(const {value,index,comment} of array){
         const ston=parseWithIndex(value,index,comment)
@@ -316,7 +316,7 @@ function tempArrayToSTONArrayValueWithIndex(array:StringWithIndex[]){
     }
     return out
 }
-function tempArrayToSTONArray(array:string[]){
+function tmpArrayToSTONArray(array:string[]){
     const out:STONArray=[]
     for(let i=0;i<array.length;i++){
         const ston=parse(array[i])
@@ -327,7 +327,7 @@ function tempArrayToSTONArray(array:string[]){
     }
     return out
 }
-function tempArrayToSTONObjectValueWithIndex(array:StringWithIndex[]){
+function tmpArrayToSTONObjectValueWithIndex(array:StringWithIndex[]){
     const out:STONObjectValueWithIndex={}
     for(const {value,index,comment} of array){
         const result=value.match(/^\s*([\w-]+)/)
@@ -358,7 +358,7 @@ function tempArrayToSTONObjectValueWithIndex(array:StringWithIndex[]){
     }
     return out
 }
-function tempArrayToSTONObject(array:string[]){
+function tmpArrayToSTONObject(array:string[]){
     const out:STONObject={}
     for(let i=0;i<array.length;i++){
         const string=array[i]
@@ -411,16 +411,16 @@ function parseToString(string:string){
     return array.join('')
 }
 function parseToArrayValueWithIndex(string:string,index:number){
-    return tempArrayToSTONArrayValueWithIndex(splitToArrayWithIndex(string,index))
+    return tmpArrayToSTONArrayValueWithIndex(splitToTmpArrayWithIndex(string,index))
 }
 function parseToArray(string:string){
-    return tempArrayToSTONArray(splitToArray(string))
+    return tmpArrayToSTONArray(splitToTmpArray(string))
 }
 function parseToObjectValueWithIndex(string:string,index:number){
-    return tempArrayToSTONObjectValueWithIndex(splitToArrayWithIndex(string,index,true))
+    return tmpArrayToSTONObjectValueWithIndex(splitToTmpArrayWithIndex(string,index,true))
 }
 function parseToObject(string:string){
-    return tempArrayToSTONObject(splitToArray(string,true))
+    return tmpArrayToSTONObject(splitToTmpArray(string,true))
 }
 function parseToValueWithIndex(string:string,index:number):STONValueWithIndex|undefined{
     if(string.length===0){
