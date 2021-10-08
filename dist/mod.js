@@ -301,8 +301,8 @@ function tmpArrayToSTONArrayValueWithIndex(array) {
 }
 function tmpArrayToSTONArray(array) {
     const out = [];
-    for (let i = 0; i < array.length; i++) {
-        const ston = parse(array[i]);
+    for (const item of array) {
+        const ston = parse(item);
         if (ston === undefined) {
             return undefined;
         }
@@ -344,8 +344,7 @@ function tmpArrayToSTONObjectValueWithIndex(array) {
 }
 function tmpArrayToSTONObject(array) {
     const out = {};
-    for (let i = 0; i < array.length; i++) {
-        const string = array[i];
+    for (const string of array) {
         const result = string.match(/^\s*([\w-]+)/);
         if (result === null) {
             const ston = parse(string);
@@ -374,8 +373,7 @@ function tmpArrayToSTONObject(array) {
 function parseToString(string) {
     const array = [];
     let escape = false;
-    for (let i = 0; i < string.length; i++) {
-        const char = string[i];
+    for (const char of string) {
         if (escape === true) {
             escape = false;
             if (char !== '\\' && char !== "'") {
