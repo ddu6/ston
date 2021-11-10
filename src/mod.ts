@@ -550,24 +550,45 @@ function stringifyArrayWithComment(array:STONArrayValueWithIndex,{indentTarget,i
     addDecorativeComma=addDecorativeComma??'never'
     const out:string[]=[]
     const expand=array.length>1
-    &&(indentTarget==='all'||indentTarget==='array'||indentTarget==='arrayInObjectAndThis')
-    ||array.find(val=>val.comment.length>0)!==undefined
+        &&(indentTarget==='all'||indentTarget==='array'||indentTarget==='arrayInObjectAndThis')
+        ||array.find(val=>val.comment.length>0)!==undefined
+    const nextIndentLevel=indentLevel+(expand?1:0)
     if(indentTarget==='arrayInObjectAndThis'){
         indentTarget='arrayInObject'
     }
     const comma=addDecorativeSpace==='always'||addDecorativeSpace==='afterComma'?', ':','
+    let nextString:string|undefined
     for(let i=0;i<array.length;i++){
         const {value,comment}=array[i]
-        const string=stringifyWithComment(value,{
-            indentTarget,
-            indentLevel:indentLevel+(expand?1:0),
-            addDecorativeComma,
-            addDecorativeSpace,
-            useUnquotedString,
-        })
+        let string:string
+        if(nextString===undefined){
+            string=stringifyWithComment(value,{
+                indentTarget,
+                indentLevel:nextIndentLevel,
+                addDecorativeComma,
+                addDecorativeSpace,
+                useUnquotedString,
+            })
+        }else{
+            string=nextString
+        }
+        if(i!==array.length-1){
+            nextString=stringifyWithComment(array[i+1].value,{
+                indentTarget,
+                indentLevel:nextIndentLevel,
+                addDecorativeComma,
+                addDecorativeSpace,
+                useUnquotedString,
+            })
+        }
         if(
-            (string.endsWith("'")||string.endsWith('}')||string.endsWith(']'))&&addDecorativeComma!=='always'
-            ||i===(array.length-1)||expand
+            expand||i===array.length-1
+            ||addDecorativeComma!=='always'&&(
+                string.endsWith("'")||string.endsWith('}')||string.endsWith(']')
+                ||nextString!==undefined&&(
+                    nextString.endsWith("'")||nextString.endsWith('}')||nextString.endsWith(']')
+                )
+            )
         ){
             if(comment.length>0){
                 out.push(...comment.split('\n'))
@@ -596,21 +617,42 @@ function stringifyArray(array:STONArray,{indentTarget,indentLevel,addDecorativeC
     addDecorativeComma=addDecorativeComma??'never'
     const out:string[]=[]
     const expand=array.length>1&&(indentTarget==='all'||indentTarget==='array'||indentTarget==='arrayInObjectAndThis')
+    const nextIndentLevel=indentLevel+(expand?1:0)
     if(indentTarget==='arrayInObjectAndThis'){
         indentTarget='arrayInObject'
     }
     const comma=addDecorativeSpace==='always'||addDecorativeSpace==='afterComma'?', ':','
+    let nextString:string|undefined
     for(let i=0;i<array.length;i++){
-        const string=stringify(array[i],{
-            indentTarget,
-            indentLevel:indentLevel+(expand?1:0),
-            addDecorativeComma,
-            addDecorativeSpace,
-            useUnquotedString,
-        })
+        let string:string
+        if(nextString===undefined){
+            string=stringify(array[i],{
+                indentTarget,
+                indentLevel:nextIndentLevel,
+                addDecorativeComma,
+                addDecorativeSpace,
+                useUnquotedString,
+            })
+        }else{
+            string=nextString
+        }
+        if(i!==array.length-1){
+            nextString=stringify(array[i+1],{
+                indentTarget,
+                indentLevel:nextIndentLevel,
+                addDecorativeComma,
+                addDecorativeSpace,
+                useUnquotedString,
+            })
+        }
         if(
-            (string.endsWith("'")||string.endsWith('}')||string.endsWith(']'))&&addDecorativeComma!=='always'
-            ||i===(array.length-1)||expand
+            expand||i===array.length-1
+            ||addDecorativeComma!=='always'&&(
+                string.endsWith("'")||string.endsWith('}')||string.endsWith(']')
+                ||nextString!==undefined&&(
+                    nextString.endsWith("'")||nextString.endsWith('}')||nextString.endsWith(']')
+                )
+            )
         ){
             out.push(string)
         }else{
@@ -636,8 +678,7 @@ function stringifyObjectWithComment(object:STONObjectValueWithIndex,{indentTarge
     addDecorativeComma=addDecorativeComma??'never'
     const out:string[]=[]
     const keys=Object.keys(object)
-    let expand=keys.length>1
-    &&(indentTarget==='all'||indentTarget==='object')
+    let expand=keys.length>1&&(indentTarget==='all'||indentTarget==='object')
     if(!expand){
         for(const key of keys){
             const val=object[key]
@@ -650,6 +691,7 @@ function stringifyObjectWithComment(object:STONObjectValueWithIndex,{indentTarge
             }
         }
     }
+    const nextIndentLevel=indentLevel+(expand?1:0)
     if(indentTarget==='arrayInObject'){
         indentTarget='arrayInObjectAndThis'
     }
@@ -668,7 +710,7 @@ function stringifyObjectWithComment(object:STONObjectValueWithIndex,{indentTarge
         const {value,comment}=val
         const string=stringifyWithComment(value,{
             indentTarget,
-            indentLevel:indentLevel+(expand?1:0),
+            indentLevel:nextIndentLevel,
             addDecorativeComma,
             addDecorativeSpace,
             useUnquotedString:key==='__'&&(typeof value==='string')?undefined:useUnquotedString,
@@ -677,19 +719,19 @@ function stringifyObjectWithComment(object:STONObjectValueWithIndex,{indentTarge
             out.push(...comment.split('\n'))
         }
         if(string.startsWith("'")||string.startsWith('[')||string.startsWith('{')){
-            if(addDecorativeComma!=='always'&&addDecorativeComma!=='inObject'||i===(keys.length-1)||expand){
+            if(expand||i===keys.length-1||addDecorativeComma!=='always'&&addDecorativeComma!=='inObject'){
                 out.push((key==='__'?'':key+spaceAfterKey)+string)
             }else{
                 out.push((key==='__'?'':key+spaceAfterKey)+string+comma)
             }
         }else if(string==='true'){
-            if(i===(keys.length-1)||expand){
+            if(expand||i===keys.length-1){
                 out.push(key)
             }else{
                 out.push(key+comma)
             }
         }else{
-            if(i===(keys.length-1)||expand){
+            if(expand||i===keys.length-1){
                 out.push(key+' '+string)
             }else{
                 out.push(key+' '+string+comma)
@@ -716,6 +758,7 @@ function stringifyObject(object:STONObject,{indentTarget,indentLevel,addDecorati
     const out:string[]=[]
     const keys=Object.keys(object)
     const expand=keys.length>1&&(indentTarget==='all'||indentTarget==='object')
+    const nextIndentLevel=indentLevel+(expand?1:0)
     if(indentTarget==='arrayInObject'){
         indentTarget='arrayInObjectAndThis'
     }
@@ -733,25 +776,25 @@ function stringifyObject(object:STONObject,{indentTarget,indentLevel,addDecorati
         }
         const string=stringify(value,{
             indentTarget,
-            indentLevel:indentLevel+(expand?1:0),
+            indentLevel:nextIndentLevel,
             addDecorativeComma,
             addDecorativeSpace,
             useUnquotedString:key==='__'&&(typeof value==='string')?undefined:useUnquotedString,
         })
         if(string.startsWith("'")||string.startsWith('[')||string.startsWith('{')){
-            if(addDecorativeComma!=='always'&&addDecorativeComma!=='inObject'||i===(keys.length-1)||expand){
+            if(expand||i===keys.length-1||addDecorativeComma!=='always'&&addDecorativeComma!=='inObject'){
                 out.push((key==='__'?'':key+spaceAfterKey)+string)
             }else{
                 out.push((key==='__'?'':key+spaceAfterKey)+string+comma)
             }
         }else if(string==='true'){
-            if(i===(keys.length-1)||expand){
+            if(expand||i===keys.length-1){
                 out.push(key)
             }else{
                 out.push(key+comma)
             }
         }else{
-            if(i===(keys.length-1)||expand){
+            if(expand||i===keys.length-1){
                 out.push(key+' '+string)
             }else{
                 out.push(key+' '+string+comma)
