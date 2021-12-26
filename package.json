@@ -11,17 +11,12 @@
     "type": "git",
     "url": "git+https://github.com/st-org/ston.git"
   },
-  "author": "ddu6",
   "license": "MIT",
   "devDependencies": {
     "typescript": "^4.5.4",
     "webpack": "^5.65.0",
     "webpack-cli": "^4.9.1"
   },
-  "bugs": {
-    "url": "https://github.com/st-org/ston/issues"
-  },
-  "homepage": "https://github.com/st-org/ston#readme",
   "engines": {
     "node": ">=14.0.0",
     "npm": ">=8.0.0"

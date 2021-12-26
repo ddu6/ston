@@ -1,4 +1,4 @@
-const ston=require('../dist/mod')
+const ston=require('../commonjs/dist/mod')
 const example=`{
     key value
     // default value is true
