@@ -1,6 +1,6 @@
 # STON
 ```js
-const ston=require('ston')
+const ston=require('ston/commonjs/dist/mod')
 const example=`{
     key value
     // default value is true
