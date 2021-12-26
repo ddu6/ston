@@ -1,3 +1,6 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.stringify = exports.stringifyWithComment = exports.parse = exports.parseWithIndex = void 0;
 function splitToTmpArrayWithIndex(string, index, keepKey = false) {
     let count = 0;
     let quote = false;
@@ -431,7 +434,7 @@ function parseToValueWithIndex(string, index) {
     }
     return string;
 }
-export function parseWithIndex(string, index = 0, comment = '') {
+function parseWithIndex(string, index = 0, comment = '') {
     index += string.length;
     string = string.trimStart();
     index -= string.length;
@@ -445,7 +448,8 @@ export function parseWithIndex(string, index = 0, comment = '') {
         comment
     };
 }
-export function parse(string) {
+exports.parseWithIndex = parseWithIndex;
+function parse(string) {
     string = string.trimStart();
     if (string.length === 0) {
         return undefined;
@@ -475,6 +479,7 @@ export function parse(string) {
     }
     return string;
 }
+exports.parse = parse;
 function stringifyString(string, useUnquotedString) {
     if (useUnquotedString) {
         if (string.length > 0
@@ -787,7 +792,7 @@ function stringifyObject(object, { indentTarget, indentLevel, addDecorativeComma
     }
     return '{' + out.join('') + '}';
 }
-export function stringifyWithComment(ston, beautifyOptions = {}) {
+function stringifyWithComment(ston, beautifyOptions = {}) {
     if (ston === undefined) {
         return '';
     }
@@ -808,7 +813,8 @@ export function stringifyWithComment(ston, beautifyOptions = {}) {
     }
     return stringifyObjectWithComment(ston, beautifyOptions);
 }
-export function stringify(ston, beautifyOptions = {}) {
+exports.stringifyWithComment = stringifyWithComment;
+function stringify(ston, beautifyOptions = {}) {
     if (ston === undefined) {
         return '';
     }
@@ -829,3 +835,4 @@ export function stringify(ston, beautifyOptions = {}) {
     }
     return stringifyObject(ston, beautifyOptions);
 }
+exports.stringify = stringify;
