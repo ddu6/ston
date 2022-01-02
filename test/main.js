@@ -1,5 +1,5 @@
-const ston=require('../commonjs/dist/mod')
-const example=`{
+const ston = require('../commonjs/dist/mod')
+const example = `{
     key value
     // default value is true
     standalone-key
@@ -9,16 +9,16 @@ const example=`{
     'standalone-value'
     escape '\\pi\\\\\\pi]\\\\'
 }`
-console.log(ston.stringify(ston.parse(example),{
-    indentTarget:'all',
-    useUnquotedString:true,
+console.log(ston.stringify(ston.parse(example), {
+    indentTarget: 'all',
+    useUnquotedString: true,
 }))
-console.log(ston.stringify(ston.parseWithIndex(example),{
-    indentTarget:'all',
-    addDecorativeSpace:'always',
+console.log(ston.stringify(ston.parseWithIndex(example), {
+    indentTarget: 'all',
+    addDecorativeSpace: 'always',
 }))
-console.log(ston.stringifyWithComment(ston.parseWithIndex(example).value,{
-    indentTarget:'all',
-    addDecorativeSpace:'always',
-    useUnquotedString:true,
-})===example)
+console.log(ston.stringifyWithComment(ston.parseWithIndex(example).value, {
+    indentTarget: 'all',
+    addDecorativeSpace: 'always',
+    useUnquotedString: true,
+}) === example)
