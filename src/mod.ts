@@ -2,19 +2,14 @@ export interface STONObject {
     [key: string]: STON | undefined
 }
 export interface STONObjectWithIndexValue {
-    [key: string]: STONWithIndex | undefined
+    [key: string]: STONWithIndex<STONWithIndexValue> | undefined
 }
 export type STONArray = STON[]
-export type STONArrayWithIndexValue = STONWithIndex[]
+export type STONArrayWithIndexValue = STONWithIndex<STONWithIndexValue>[]
 export type STON = STONObject | STONArray | string | number | boolean
 export type STONWithIndexValue = STONObjectWithIndexValue | STONArrayWithIndexValue | string | number | boolean
-export interface STONWithIndex {
-    value: STONWithIndexValue
-    index: number
-    comment: string
-}
-export interface StringWithIndex {
-    value: string
+export interface STONWithIndex<T extends STONWithIndexValue> {
+    value: T
     index: number
     comment: string
 }
@@ -149,7 +144,7 @@ function splitToTmpArrayWithIndex(string: string, index: number, keepKey = false
     let last = 0
     let commentType: false | 'line' | 'block' = false
     let comments: string[] = []
-    const array: StringWithIndex[] = []
+    const array: STONWithIndex<string>[] = []
     for (let i = 0; i < string.length; i++) {
         if (escape === true) {
             escape = false
@@ -465,7 +460,7 @@ function parseToWithIndexValue(string: string, index: number): STONWithIndexValu
     }
     return string
 }
-export function parseWithIndex(string: string, index = 0, comment = ''): STONWithIndex | undefined {
+export function parseWithIndex(string: string, index = 0, comment = ''): STONWithIndex<STONWithIndexValue> | undefined {
     index += string.length
     string = string.trimStart()
     index -= string.length
