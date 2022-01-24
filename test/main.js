@@ -1,4 +1,4 @@
-const ston = require('../commonjs/dist/mod')
+const ston = require('../mod.c')
 const example = `{
     key value
     // default value is true
