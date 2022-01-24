@@ -1,15 +1,15 @@
 export interface STONObject {
     [key: string]: STON | undefined;
 }
-export interface STONObjectValueWithIndex {
+export interface STONObjectWithIndexValue {
     [key: string]: STONWithIndex | undefined;
 }
 export declare type STONArray = STON[];
-export declare type STONArrayValueWithIndex = STONWithIndex[];
+export declare type STONArrayWithIndexValue = STONWithIndex[];
 export declare type STON = STONObject | STONArray | string | number | boolean;
-export declare type STONValueWithIndex = STONObjectValueWithIndex | STONArrayValueWithIndex | string | number | boolean;
+export declare type STONWithIndexValue = STONObjectWithIndexValue | STONArrayWithIndexValue | string | number | boolean;
 export interface STONWithIndex {
-    value: STONValueWithIndex;
+    value: STONWithIndexValue;
     index: number;
     comment: string;
 }
@@ -18,8 +18,8 @@ export interface StringWithIndex {
     index: number;
     comment: string;
 }
-export declare function parseWithIndex(string: string, index?: number, comment?: string): STONWithIndex | undefined;
 export declare function parse(string: string): STON | undefined;
+export declare function parseWithIndex(string: string, index?: number, comment?: string): STONWithIndex | undefined;
 export interface BeautifyOptions {
     indentTarget?: 'none' | 'all' | 'array' | 'object' | 'arrayInObject' | 'arrayInObjectAndThis';
     indentLevel?: number;
@@ -27,5 +27,5 @@ export interface BeautifyOptions {
     addDecorativeSpace?: 'never' | 'always' | 'afterKey' | 'afterComma';
     useUnquotedString?: true;
 }
-export declare function stringifyWithComment(ston: STONValueWithIndex | undefined, beautifyOptions?: BeautifyOptions): string;
 export declare function stringify(ston: STON | undefined, beautifyOptions?: BeautifyOptions): string;
+export declare function stringifyWithComment(ston: STONWithIndexValue | undefined, beautifyOptions?: BeautifyOptions): string;
