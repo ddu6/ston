@@ -337,7 +337,7 @@ function parseToArray(string: string) {
     }
     return out
 }
-function parseToArrayValueWithIndex(string: string, index: number) {
+function parseToArrayWithIndexValue(string: string, index: number) {
     const out: STONArrayWithIndexValue = []
     for (const {value, index: subIndex, comment} of splitToTmpArrayWithIndex(string, index)) {
         const ston = parseWithIndex(value, subIndex, comment)
@@ -375,7 +375,7 @@ function parseToObject(string: string) {
     }
     return out
 }
-function parseToObjectValueWithIndex(string: string, index: number) {
+function parseToObjectWithIndexValue(string: string, index: number) {
     const out: STONObjectWithIndexValue = {}
     for (const {value, index: subIndex, comment} of splitToTmpArrayWithIndex(string, index, true)) {
         const result = value.match(/^\s*([\w-]+)/)
@@ -445,10 +445,10 @@ function parseToWithIndexValue(string: string, index: number): STONWithIndexValu
         return parseToString(string.slice(1))
     }
     if (start === '[') {
-        return parseToArrayValueWithIndex(string.slice(1), index + 1)
+        return parseToArrayWithIndexValue(string.slice(1), index + 1)
     }
     if (start === '{') {
-        return parseToObjectValueWithIndex(string.slice(1), index + 1)
+        return parseToObjectWithIndexValue(string.slice(1), index + 1)
     }
     string = string.trimEnd()
     if (string === 'true') {
@@ -480,10 +480,10 @@ export function parseWithIndex(string: string, index = 0, comment = ''): STONWit
     }
 }
 export interface BeautifyOptions {
-    indentTarget?: 'none' | 'all' | 'array' | 'object' | 'arrayInObject' | 'arrayInObjectAndThis'
-    indentLevel?: number
     addDecorativeComma?: 'never' | 'always' | 'inObject'
     addDecorativeSpace?: 'never' | 'always' | 'afterKey' | 'afterComma'
+    indentLevel?: number
+    indentTarget?: 'none' | 'all' | 'array' | 'object' | 'arrayInObject' | 'arrayInObjectAndThis'
     useUnquotedString?: true
 }
 function stringifyString(string: string, useUnquotedString?: true) {
@@ -530,7 +530,7 @@ function stringifyString(string: string, useUnquotedString?: true) {
     array.push("'")
     return array.join('')
 }
-function stringifyArray(array: STONArray, {indentTarget, indentLevel, addDecorativeComma, addDecorativeSpace, useUnquotedString}: BeautifyOptions) {
+function stringifyArray(array: STONArray, {addDecorativeComma, addDecorativeSpace, indentLevel, indentTarget, useUnquotedString}: BeautifyOptions) {
     indentTarget = indentTarget ?? 'none'
     indentLevel = indentLevel ?? 0
     addDecorativeComma = addDecorativeComma ?? 'never'
@@ -578,20 +578,20 @@ function stringifyArray(array: STONArray, {indentTarget, indentLevel, addDecorat
             out.push(string + comma)
         }
     }
-    let footAdd = '\n'
-    for (let i = 0; i < indentLevel; i++) {
-        footAdd += '    '
-    }
-    let bodyAdd = footAdd
-    if (indentLevel >= 0) {
-        bodyAdd += '    '
-    }
     if (expand) {
-        return '[' + bodyAdd + out.join(bodyAdd) + footAdd + ']'
+        let footAdd = '\n'
+        for (let i = 0; i < indentLevel; i++) {
+            footAdd += '    '
+        }
+        let bodyAdd = footAdd
+        if (indentLevel >= 0) {
+            bodyAdd += '    '
+        }
+        return `[${bodyAdd}${out.join(bodyAdd)}${footAdd}]`
     }
-    return '[' + out.join('') + ']'
+    return `[${out.join('')}]`
 }
-function stringifyArrayWithComment(array: STONArrayWithIndexValue, {indentTarget, indentLevel, addDecorativeComma, addDecorativeSpace, useUnquotedString}: BeautifyOptions) {
+function stringifyArrayWithComment(array: STONArrayWithIndexValue, {addDecorativeComma, addDecorativeSpace, indentLevel, indentTarget, useUnquotedString}: BeautifyOptions) {
     indentTarget = indentTarget ?? 'none'
     indentLevel = indentLevel ?? 0
     addDecorativeComma = addDecorativeComma ?? 'never'
@@ -645,20 +645,20 @@ function stringifyArrayWithComment(array: STONArrayWithIndexValue, {indentTarget
             out.push(string + comma)
         }
     }
-    let footAdd = '\n'
-    for (let i = 0; i < indentLevel; i++) {
-        footAdd += '    '
-    }
-    let bodyAdd = footAdd
-    if (indentLevel >= 0) {
-        bodyAdd += '    '
-    }
     if (expand) {
-        return '[' + bodyAdd + out.join(bodyAdd) + footAdd + ']'
+        let footAdd = '\n'
+        for (let i = 0; i < indentLevel; i++) {
+            footAdd += '    '
+        }
+        let bodyAdd = footAdd
+        if (indentLevel >= 0) {
+            bodyAdd += '    '
+        }
+        return `[${bodyAdd}${out.join(bodyAdd)}${footAdd}]`
     }
-    return '[' + out.join('') + ']'
+    return `[${out.join('')}]`
 }
-function stringifyObject(object: STONObject, {indentTarget, indentLevel, addDecorativeComma, addDecorativeSpace, useUnquotedString}: BeautifyOptions) {
+function stringifyObject(object: STONObject, {addDecorativeComma, addDecorativeSpace, indentLevel, indentTarget, useUnquotedString}: BeautifyOptions) {
     indentTarget = indentTarget ?? 'none'
     indentLevel = indentLevel ?? 0
     addDecorativeComma = addDecorativeComma ?? 'never'
@@ -702,26 +702,26 @@ function stringifyObject(object: STONObject, {indentTarget, indentLevel, addDeco
             }
         } else {
             if (expand || i === keys.length - 1) {
-                out.push(key + ' ' + string)
+                out.push(`${key} ${string}`)
             } else {
-                out.push(key + ' ' + string + comma)
+                out.push(`${key} ${string}${comma}`)
             }
         }
     }
-    let footAdd = '\n'
-    for (let i = 0; i < indentLevel; i++) {
-        footAdd += '    '
-    }
-    let bodyAdd = footAdd
-    if (indentLevel >= 0) {
-        bodyAdd += '    '
-    }
     if (expand) {
-        return '{' + bodyAdd + out.join(bodyAdd) + footAdd + '}'
+        let footAdd = '\n'
+        for (let i = 0; i < indentLevel; i++) {
+            footAdd += '    '
+        }
+        let bodyAdd = footAdd
+        if (indentLevel >= 0) {
+            bodyAdd += '    '
+        }
+        return `{${bodyAdd}${out.join(bodyAdd)}${footAdd}}'`
     }
-    return '{' + out.join('') + '}'
+    return `{${out.join('')}}`
 }
-function stringifyObjectWithComment(object: STONObjectWithIndexValue, {indentTarget, indentLevel, addDecorativeComma, addDecorativeSpace, useUnquotedString}: BeautifyOptions) {
+function stringifyObjectWithComment(object: STONObjectWithIndexValue, {addDecorativeComma, addDecorativeSpace, indentLevel, indentTarget, useUnquotedString}: BeautifyOptions) {
     indentTarget = indentTarget ?? 'none'
     indentLevel = indentLevel ?? 0
     addDecorativeComma = addDecorativeComma ?? 'never'
@@ -781,49 +781,31 @@ function stringifyObjectWithComment(object: STONObjectWithIndexValue, {indentTar
             }
         } else {
             if (expand || i === keys.length - 1) {
-                out.push(key + ' ' + string)
+                out.push(`${key} ${string}`)
             } else {
-                out.push(key + ' ' + string + comma)
+                out.push(`${key} ${string}${comma}`)
             }
         }
     }
-    let footAdd = '\n'
-    for (let i = 0; i < indentLevel; i++) {
-        footAdd += '    '
-    }
-    let bodyAdd = footAdd
-    if (indentLevel >= 0) {
-        bodyAdd += '    '
-    }
     if (expand) {
-        return '{' + bodyAdd + out.join(bodyAdd) + footAdd + '}'
+        let footAdd = '\n'
+        for (let i = 0; i < indentLevel; i++) {
+            footAdd += '    '
+        }
+        let bodyAdd = footAdd
+        if (indentLevel >= 0) {
+            bodyAdd += '    '
+        }
+        return `{${bodyAdd}${out.join(bodyAdd)}${footAdd}}`
     }
-    return '{' + out.join('') + '}'
+    return `{${out.join('')}}`
 }
 export function stringify(ston: STON | undefined, beautifyOptions: BeautifyOptions = {}) {
-    if (ston === undefined) {
-        return ''
-    }
-    if (typeof ston === 'number') {
-        return ston.toString()
-    }
-    if (typeof ston === 'string') {
-        return stringifyString(ston, beautifyOptions.useUnquotedString)
-    }
-    if (ston === true) {
-        return 'true'
-    }
-    if (ston === false) {
-        return 'false'
-    }
     if (Array.isArray(ston)) {
         return stringifyArray(ston, beautifyOptions)
     }
-    return stringifyObject(ston, beautifyOptions)
-}
-export function stringifyWithComment(ston: STONWithIndexValue | undefined, beautifyOptions: BeautifyOptions = {}) {
-    if (ston === undefined) {
-        return ''
+    if (typeof ston === 'object') {
+        return stringifyObject(ston, beautifyOptions)
     }
     if (typeof ston === 'number') {
         return ston.toString()
@@ -837,8 +819,26 @@ export function stringifyWithComment(ston: STONWithIndexValue | undefined, beaut
     if (ston === false) {
         return 'false'
     }
+    return ''
+}
+export function stringifyWithComment(ston: STONWithIndexValue | undefined, beautifyOptions: BeautifyOptions = {}) {
     if (Array.isArray(ston)) {
         return stringifyArrayWithComment(ston, beautifyOptions)
     }
-    return stringifyObjectWithComment(ston, beautifyOptions)
+    if (typeof ston === 'object') {
+        return stringifyObjectWithComment(ston, beautifyOptions)
+    }
+    if (typeof ston === 'string') {
+        return stringifyString(ston, beautifyOptions.useUnquotedString)
+    }
+    if (typeof ston === 'number') {
+        return ston.toString()
+    }
+    if (ston === true) {
+        return 'true'
+    }
+    if (ston === false) {
+        return 'false'
+    }
+    return ''
 }

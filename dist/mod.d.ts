@@ -21,10 +21,10 @@ export interface StringWithIndex {
 export declare function parse(string: string): STON | undefined;
 export declare function parseWithIndex(string: string, index?: number, comment?: string): STONWithIndex | undefined;
 export interface BeautifyOptions {
-    indentTarget?: 'none' | 'all' | 'array' | 'object' | 'arrayInObject' | 'arrayInObjectAndThis';
-    indentLevel?: number;
     addDecorativeComma?: 'never' | 'always' | 'inObject';
     addDecorativeSpace?: 'never' | 'always' | 'afterKey' | 'afterComma';
+    indentLevel?: number;
+    indentTarget?: 'none' | 'all' | 'array' | 'object' | 'arrayInObject' | 'arrayInObjectAndThis';
     useUnquotedString?: true;
 }
 export declare function stringify(ston: STON | undefined, beautifyOptions?: BeautifyOptions): string;

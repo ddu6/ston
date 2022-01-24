@@ -317,7 +317,7 @@ function parseToArray(string) {
     }
     return out;
 }
-function parseToArrayValueWithIndex(string, index) {
+function parseToArrayWithIndexValue(string, index) {
     const out = [];
     for (const { value, index: subIndex, comment } of splitToTmpArrayWithIndex(string, index)) {
         const ston = parseWithIndex(value, subIndex, comment);
@@ -356,7 +356,7 @@ function parseToObject(string) {
     }
     return out;
 }
-function parseToObjectValueWithIndex(string, index) {
+function parseToObjectWithIndexValue(string, index) {
     const out = {};
     for (const { value, index: subIndex, comment } of splitToTmpArrayWithIndex(string, index, true)) {
         const result = value.match(/^\s*([\w-]+)/);
@@ -427,10 +427,10 @@ function parseToWithIndexValue(string, index) {
         return parseToString(string.slice(1));
     }
     if (start === '[') {
-        return parseToArrayValueWithIndex(string.slice(1), index + 1);
+        return parseToArrayWithIndexValue(string.slice(1), index + 1);
     }
     if (start === '{') {
-        return parseToObjectValueWithIndex(string.slice(1), index + 1);
+        return parseToObjectWithIndexValue(string.slice(1), index + 1);
     }
     string = string.trimEnd();
     if (string === 'true') {
@@ -501,7 +501,7 @@ function stringifyString(string, useUnquotedString) {
     array.push("'");
     return array.join('');
 }
-function stringifyArray(array, { indentTarget, indentLevel, addDecorativeComma, addDecorativeSpace, useUnquotedString }) {
+function stringifyArray(array, { addDecorativeComma, addDecorativeSpace, indentLevel, indentTarget, useUnquotedString }) {
     indentTarget = indentTarget ?? 'none';
     indentLevel = indentLevel ?? 0;
     addDecorativeComma = addDecorativeComma ?? 'never';
@@ -545,20 +545,20 @@ function stringifyArray(array, { indentTarget, indentLevel, addDecorativeComma, 
             out.push(string + comma);
         }
     }
-    let footAdd = '\n';
-    for (let i = 0; i < indentLevel; i++) {
-        footAdd += '    ';
-    }
-    let bodyAdd = footAdd;
-    if (indentLevel >= 0) {
-        bodyAdd += '    ';
-    }
     if (expand) {
-        return '[' + bodyAdd + out.join(bodyAdd) + footAdd + ']';
+        let footAdd = '\n';
+        for (let i = 0; i < indentLevel; i++) {
+            footAdd += '    ';
+        }
+        let bodyAdd = footAdd;
+        if (indentLevel >= 0) {
+            bodyAdd += '    ';
+        }
+        return `[${bodyAdd}${out.join(bodyAdd)}${footAdd}]`;
     }
-    return '[' + out.join('') + ']';
+    return `[${out.join('')}]`;
 }
-function stringifyArrayWithComment(array, { indentTarget, indentLevel, addDecorativeComma, addDecorativeSpace, useUnquotedString }) {
+function stringifyArrayWithComment(array, { addDecorativeComma, addDecorativeSpace, indentLevel, indentTarget, useUnquotedString }) {
     indentTarget = indentTarget ?? 'none';
     indentLevel = indentLevel ?? 0;
     addDecorativeComma = addDecorativeComma ?? 'never';
@@ -608,20 +608,20 @@ function stringifyArrayWithComment(array, { indentTarget, indentLevel, addDecora
             out.push(string + comma);
         }
     }
-    let footAdd = '\n';
-    for (let i = 0; i < indentLevel; i++) {
-        footAdd += '    ';
-    }
-    let bodyAdd = footAdd;
-    if (indentLevel >= 0) {
-        bodyAdd += '    ';
-    }
     if (expand) {
-        return '[' + bodyAdd + out.join(bodyAdd) + footAdd + ']';
+        let footAdd = '\n';
+        for (let i = 0; i < indentLevel; i++) {
+            footAdd += '    ';
+        }
+        let bodyAdd = footAdd;
+        if (indentLevel >= 0) {
+            bodyAdd += '    ';
+        }
+        return `[${bodyAdd}${out.join(bodyAdd)}${footAdd}]`;
     }
-    return '[' + out.join('') + ']';
+    return `[${out.join('')}]`;
 }
-function stringifyObject(object, { indentTarget, indentLevel, addDecorativeComma, addDecorativeSpace, useUnquotedString }) {
+function stringifyObject(object, { addDecorativeComma, addDecorativeSpace, indentLevel, indentTarget, useUnquotedString }) {
     indentTarget = indentTarget ?? 'none';
     indentLevel = indentLevel ?? 0;
     addDecorativeComma = addDecorativeComma ?? 'never';
@@ -669,27 +669,27 @@ function stringifyObject(object, { indentTarget, indentLevel, addDecorativeComma
         }
         else {
             if (expand || i === keys.length - 1) {
-                out.push(key + ' ' + string);
+                out.push(`${key} ${string}`);
             }
             else {
-                out.push(key + ' ' + string + comma);
+                out.push(`${key} ${string}${comma}`);
             }
         }
     }
-    let footAdd = '\n';
-    for (let i = 0; i < indentLevel; i++) {
-        footAdd += '    ';
-    }
-    let bodyAdd = footAdd;
-    if (indentLevel >= 0) {
-        bodyAdd += '    ';
-    }
     if (expand) {
-        return '{' + bodyAdd + out.join(bodyAdd) + footAdd + '}';
+        let footAdd = '\n';
+        for (let i = 0; i < indentLevel; i++) {
+            footAdd += '    ';
+        }
+        let bodyAdd = footAdd;
+        if (indentLevel >= 0) {
+            bodyAdd += '    ';
+        }
+        return `{${bodyAdd}${out.join(bodyAdd)}${footAdd}}'`;
     }
-    return '{' + out.join('') + '}';
+    return `{${out.join('')}}`;
 }
-function stringifyObjectWithComment(object, { indentTarget, indentLevel, addDecorativeComma, addDecorativeSpace, useUnquotedString }) {
+function stringifyObjectWithComment(object, { addDecorativeComma, addDecorativeSpace, indentLevel, indentTarget, useUnquotedString }) {
     indentTarget = indentTarget ?? 'none';
     indentLevel = indentLevel ?? 0;
     addDecorativeComma = addDecorativeComma ?? 'never';
@@ -753,50 +753,32 @@ function stringifyObjectWithComment(object, { indentTarget, indentLevel, addDeco
         }
         else {
             if (expand || i === keys.length - 1) {
-                out.push(key + ' ' + string);
+                out.push(`${key} ${string}`);
             }
             else {
-                out.push(key + ' ' + string + comma);
+                out.push(`${key} ${string}${comma}`);
             }
         }
     }
-    let footAdd = '\n';
-    for (let i = 0; i < indentLevel; i++) {
-        footAdd += '    ';
-    }
-    let bodyAdd = footAdd;
-    if (indentLevel >= 0) {
-        bodyAdd += '    ';
-    }
     if (expand) {
-        return '{' + bodyAdd + out.join(bodyAdd) + footAdd + '}';
+        let footAdd = '\n';
+        for (let i = 0; i < indentLevel; i++) {
+            footAdd += '    ';
+        }
+        let bodyAdd = footAdd;
+        if (indentLevel >= 0) {
+            bodyAdd += '    ';
+        }
+        return `{${bodyAdd}${out.join(bodyAdd)}${footAdd}}`;
     }
-    return '{' + out.join('') + '}';
+    return `{${out.join('')}}`;
 }
 export function stringify(ston, beautifyOptions = {}) {
-    if (ston === undefined) {
-        return '';
-    }
-    if (typeof ston === 'number') {
-        return ston.toString();
-    }
-    if (typeof ston === 'string') {
-        return stringifyString(ston, beautifyOptions.useUnquotedString);
-    }
-    if (ston === true) {
-        return 'true';
-    }
-    if (ston === false) {
-        return 'false';
-    }
     if (Array.isArray(ston)) {
         return stringifyArray(ston, beautifyOptions);
     }
-    return stringifyObject(ston, beautifyOptions);
-}
-export function stringifyWithComment(ston, beautifyOptions = {}) {
-    if (ston === undefined) {
-        return '';
+    if (typeof ston === 'object') {
+        return stringifyObject(ston, beautifyOptions);
     }
     if (typeof ston === 'number') {
         return ston.toString();
@@ -810,8 +792,26 @@ export function stringifyWithComment(ston, beautifyOptions = {}) {
     if (ston === false) {
         return 'false';
     }
+    return '';
+}
+export function stringifyWithComment(ston, beautifyOptions = {}) {
     if (Array.isArray(ston)) {
         return stringifyArrayWithComment(ston, beautifyOptions);
     }
-    return stringifyObjectWithComment(ston, beautifyOptions);
+    if (typeof ston === 'object') {
+        return stringifyObjectWithComment(ston, beautifyOptions);
+    }
+    if (typeof ston === 'string') {
+        return stringifyString(ston, beautifyOptions.useUnquotedString);
+    }
+    if (typeof ston === 'number') {
+        return ston.toString();
+    }
+    if (ston === true) {
+        return 'true';
+    }
+    if (ston === false) {
+        return 'false';
+    }
+    return '';
 }
