@@ -54,7 +54,6 @@ function splitToTmpArray(string, keepKey = false) {
         if (quote) {
             if (char === '\\') {
                 escape = true;
-                continue;
             }
             continue;
         }
@@ -192,7 +191,6 @@ function splitToTmpArrayWithIndex(string, index, keepKey = false) {
         if (quote) {
             if (char === '\\') {
                 escape = true;
-                continue;
             }
             continue;
         }
@@ -572,7 +570,7 @@ function stringifyArrayWithComment(array, { indentTarget, indentLevel, addDecora
     const out = [];
     const expand = array.length > 1
         && (indentTarget === 'all' || indentTarget === 'array' || indentTarget === 'arrayInObjectAndThis')
-        || array.find(val => val.comment.length > 0) !== undefined;
+        || array.find(value => value.comment.length > 0) !== undefined;
     const nextIndentLevel = indentLevel + (expand ? 1 : 0);
     if (indentTarget === 'arrayInObjectAndThis') {
         indentTarget = 'arrayInObject';
@@ -705,11 +703,11 @@ function stringifyObjectWithComment(object, { indentTarget, indentLevel, addDeco
     let expand = keys.length > 1 && (indentTarget === 'all' || indentTarget === 'object');
     if (!expand) {
         for (const key of keys) {
-            const val = object[key];
-            if (val === undefined) {
+            const value = object[key];
+            if (value === undefined) {
                 continue;
             }
-            if (val.comment.length > 0) {
+            if (value.comment.length > 0) {
                 expand = true;
                 break;
             }
@@ -727,11 +725,11 @@ function stringifyObjectWithComment(object, { indentTarget, indentLevel, addDeco
         if (result === null) {
             continue;
         }
-        const val = object[key];
-        if (val === undefined) {
+        const valueWithComment = object[key];
+        if (valueWithComment === undefined) {
             continue;
         }
-        const { value, comment } = val;
+        const { value, comment } = valueWithComment;
         const string = stringifyWithComment(value, {
             indentTarget,
             indentLevel: nextIndentLevel,
