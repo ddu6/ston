@@ -188,10 +188,10 @@ export function parse(string: string): STON | undefined {
     if (string === 'false') {
         return false
     }
-    if (/^(?:[+-]?Infinity|NaN|0x[\da-fA-F]+|0o[0-7]+|0b[01]+|[+-]?(?:\d*\.?\d+|\d+\.)(?:e[+-]?\d+)?)$/.test(string)) {
+    if (/^(?:[+-]?Infinity|NaN|0x[\dA-Fa-f]+|0o[0-7]+|0b[01]+|[+-]?(?:\d*\.?\d+|\d+\.)(?:e[+-]?\d+)?)$/.test(string)) {
         return Number(string)
     }
-    if (/[',{}\[\]\n\r]/.test(string)) {
+    if (/[\n\r',\[\]{}]/.test(string)) {
         return undefined
     }
     return string

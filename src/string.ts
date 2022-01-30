@@ -30,10 +30,10 @@ export function stringifyString(string: string, useUnquotedString?: true) {
                 string.length === 1
                 || string[string.length - 1].trim().length > 0
             )
-            && !/[',{}\[\]\n\r]/.test(string)
+            && !/[\n\r',\[\]{}]/.test(string)
             && string !== 'true'
             && string !== 'false'
-            && !/^(?:[+-]?Infinity|NaN|0x[\da-fA-F]+|0o[0-7]+|0b[01]+|[+-]?(?:\d*\.?\d+|\d+\.)(?:e[+-]?\d+)?)$/.test(string)
+            && !/^(?:[+-]?Infinity|NaN|0x[\dA-Fa-f]+|0o[0-7]+|0b[01]+|[+-]?(?:\d*\.?\d+|\d+\.)(?:e[+-]?\d+)?)$/.test(string)
             && !string.startsWith('//')
             && !string.startsWith('/*')
         ) {
