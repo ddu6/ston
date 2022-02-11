@@ -120,7 +120,7 @@ function stringifyObject(object, { addDecorativeComma, addDecorativeSpace, inden
         if (indentLevel >= 0) {
             bodyAdd += '    ';
         }
-        return `{${bodyAdd}${out.join(bodyAdd)}${footAdd}}'`;
+        return `{${bodyAdd}${out.join(bodyAdd)}${footAdd}}`;
     }
     return `{${out.join('')}}`;
 }
