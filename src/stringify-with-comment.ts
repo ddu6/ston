@@ -1,5 +1,5 @@
 import {stringifyString} from './string'
-import type {STONArrayWithIndexValue, STONObjectWithIndexValue, STONWithIndexValue} from './parse-with-index'
+import type {STONArrayWithIndexValue, STONObjectWithIndexValue, STONWithIndex, STONWithIndexValue} from './parse-with-index'
 import type {BeautifyOptions} from './stringify'
 function stringifyArrayWithComment(array: STONArrayWithIndexValue, {addDecorativeComma, addDecorativeSpace, indentLevel, indentTarget, useUnquotedString}: BeautifyOptions) {
     addDecorativeComma = addDecorativeComma ?? 'never'
@@ -16,10 +16,11 @@ function stringifyArrayWithComment(array: STONArrayWithIndexValue, {addDecorativ
     const comma = addDecorativeSpace === 'always' || addDecorativeSpace === 'afterComma' ? ', ' : ','
     let nextString: string | undefined
     for (let i = 0; i < array.length; i++) {
-        const {value, comment} = array[i]
+        const valueWithComment = array[i]
+        const {comment} = valueWithComment
         let string: string
         if (nextString === undefined) {
-            string = stringifyWithComment(value, {
+            string = stringifyWithComment(valueWithComment, {
                 addDecorativeComma,
                 addDecorativeSpace,
                 indentTarget,
@@ -30,7 +31,7 @@ function stringifyArrayWithComment(array: STONArrayWithIndexValue, {addDecorativ
             string = nextString
         }
         if (i !== array.length - 1) {
-            nextString = stringifyWithComment(array[i + 1].value, {
+            nextString = stringifyWithComment(array[i + 1], {
                 addDecorativeComma,
                 addDecorativeSpace,
                 indentTarget,
@@ -104,7 +105,7 @@ function stringifyObjectWithComment(object: STONObjectWithIndexValue, {addDecora
             continue
         }
         const {value, comment} = valueWithComment
-        const string = stringifyWithComment(value, {
+        const string = stringifyWithComment(valueWithComment, {
             addDecorativeComma,
             addDecorativeSpace,
             indentTarget,
@@ -147,23 +148,27 @@ function stringifyObjectWithComment(object: STONObjectWithIndexValue, {addDecora
     }
     return `{${out.join('')}}`
 }
-export function stringifyWithComment(ston: STONWithIndexValue | undefined, beautifyOptions: BeautifyOptions = {}) {
-    if (Array.isArray(ston)) {
-        return stringifyArrayWithComment(ston, beautifyOptions)
+export function stringifyWithComment(ston: STONWithIndex<STONWithIndexValue> | undefined, beautifyOptions: BeautifyOptions = {}) {
+    if (ston === undefined) {
+        return ''
     }
-    if (typeof ston === 'object') {
-        return stringifyObjectWithComment(ston, beautifyOptions)
+    const {value} = ston
+    if (Array.isArray(value)) {
+        return stringifyArrayWithComment(value, beautifyOptions)
     }
-    if (typeof ston === 'string') {
-        return stringifyString(ston, beautifyOptions.useUnquotedString)
+    if (typeof value === 'object') {
+        return stringifyObjectWithComment(value, beautifyOptions)
     }
-    if (typeof ston === 'number') {
-        return ston.toString()
+    if (typeof value === 'string') {
+        return stringifyString(value, beautifyOptions.useUnquotedString)
     }
-    if (ston === true) {
+    if (typeof value === 'number') {
+        return value.toString()
+    }
+    if (value === true) {
         return 'true'
     }
-    if (ston === false) {
+    if (value === false) {
         return 'false'
     }
     return ''

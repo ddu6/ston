@@ -14,10 +14,11 @@ function stringifyArrayWithComment(array, { addDecorativeComma, addDecorativeSpa
     const comma = addDecorativeSpace === 'always' || addDecorativeSpace === 'afterComma' ? ', ' : ',';
     let nextString;
     for (let i = 0; i < array.length; i++) {
-        const { value, comment } = array[i];
+        const valueWithComment = array[i];
+        const { comment } = valueWithComment;
         let string;
         if (nextString === undefined) {
-            string = stringifyWithComment(value, {
+            string = stringifyWithComment(valueWithComment, {
                 addDecorativeComma,
                 addDecorativeSpace,
                 indentTarget,
@@ -29,7 +30,7 @@ function stringifyArrayWithComment(array, { addDecorativeComma, addDecorativeSpa
             string = nextString;
         }
         if (i !== array.length - 1) {
-            nextString = stringifyWithComment(array[i + 1].value, {
+            nextString = stringifyWithComment(array[i + 1], {
                 addDecorativeComma,
                 addDecorativeSpace,
                 indentTarget,
@@ -98,7 +99,7 @@ function stringifyObjectWithComment(object, { addDecorativeComma, addDecorativeS
             continue;
         }
         const { value, comment } = valueWithComment;
-        const string = stringifyWithComment(value, {
+        const string = stringifyWithComment(valueWithComment, {
             addDecorativeComma,
             addDecorativeSpace,
             indentTarget,
@@ -147,22 +148,26 @@ function stringifyObjectWithComment(object, { addDecorativeComma, addDecorativeS
     return `{${out.join('')}}`;
 }
 export function stringifyWithComment(ston, beautifyOptions = {}) {
-    if (Array.isArray(ston)) {
-        return stringifyArrayWithComment(ston, beautifyOptions);
+    if (ston === undefined) {
+        return '';
     }
-    if (typeof ston === 'object') {
-        return stringifyObjectWithComment(ston, beautifyOptions);
+    const { value } = ston;
+    if (Array.isArray(value)) {
+        return stringifyArrayWithComment(value, beautifyOptions);
     }
-    if (typeof ston === 'string') {
-        return stringifyString(ston, beautifyOptions.useUnquotedString);
+    if (typeof value === 'object') {
+        return stringifyObjectWithComment(value, beautifyOptions);
     }
-    if (typeof ston === 'number') {
-        return ston.toString();
+    if (typeof value === 'string') {
+        return stringifyString(value, beautifyOptions.useUnquotedString);
     }
-    if (ston === true) {
+    if (typeof value === 'number') {
+        return value.toString();
+    }
+    if (value === true) {
         return 'true';
     }
-    if (ston === false) {
+    if (value === false) {
         return 'false';
     }
     return '';
