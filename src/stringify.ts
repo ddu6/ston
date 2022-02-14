@@ -8,9 +8,9 @@ export interface BeautifyOptions {
     useUnquotedString?: true
 }
 function stringifyArray(array: STONArray, {addDecorativeComma, addDecorativeSpace, indentLevel, indentTarget, useUnquotedString}: BeautifyOptions) {
+    addDecorativeComma = addDecorativeComma ?? 'never'
     indentTarget = indentTarget ?? 'none'
     indentLevel = indentLevel ?? 0
-    addDecorativeComma = addDecorativeComma ?? 'never'
     const out: string[] = []
     const expand = array.length > 1 && (indentTarget === 'all' || indentTarget === 'array' || indentTarget === 'arrayInObjectAndThis')
     const nextIndentLevel = indentLevel + (expand ? 1 : 0)
@@ -23,10 +23,10 @@ function stringifyArray(array: STONArray, {addDecorativeComma, addDecorativeSpac
         let string: string
         if (nextString === undefined) {
             string = stringify(array[i], {
-                indentTarget,
-                indentLevel: nextIndentLevel,
                 addDecorativeComma,
                 addDecorativeSpace,
+                indentTarget,
+                indentLevel: nextIndentLevel,
                 useUnquotedString,
             })
         } else {
@@ -34,10 +34,10 @@ function stringifyArray(array: STONArray, {addDecorativeComma, addDecorativeSpac
         }
         if (i !== array.length - 1) {
             nextString = stringify(array[i + 1], {
-                indentTarget,
-                indentLevel: nextIndentLevel,
                 addDecorativeComma,
                 addDecorativeSpace,
+                indentTarget,
+                indentLevel: nextIndentLevel,
                 useUnquotedString,
             })
         }
@@ -69,9 +69,9 @@ function stringifyArray(array: STONArray, {addDecorativeComma, addDecorativeSpac
     return `[${out.join('')}]`
 }
 function stringifyObject(object: STONObject, {addDecorativeComma, addDecorativeSpace, indentLevel, indentTarget, useUnquotedString}: BeautifyOptions) {
+    addDecorativeComma = addDecorativeComma ?? 'never'
     indentTarget = indentTarget ?? 'none'
     indentLevel = indentLevel ?? 0
-    addDecorativeComma = addDecorativeComma ?? 'never'
     const out: string[] = []
     const keys = Object.keys(object)
     const expand = keys.length > 1 && (indentTarget === 'all' || indentTarget === 'object')
@@ -92,10 +92,10 @@ function stringifyObject(object: STONObject, {addDecorativeComma, addDecorativeS
             continue
         }
         const string = stringify(value, {
-            indentTarget,
-            indentLevel: nextIndentLevel,
             addDecorativeComma,
             addDecorativeSpace,
+            indentTarget,
+            indentLevel: nextIndentLevel,
             useUnquotedString: key === '__' && (typeof value === 'string') ? undefined : useUnquotedString,
         })
         if (string.startsWith("'") || string.startsWith('[') || string.startsWith('{')) {

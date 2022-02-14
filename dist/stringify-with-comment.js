@@ -1,8 +1,8 @@
 import { stringifyString } from './string';
 function stringifyArrayWithComment(array, { addDecorativeComma, addDecorativeSpace, indentLevel, indentTarget, useUnquotedString }) {
+    addDecorativeComma = addDecorativeComma ?? 'never';
     indentTarget = indentTarget ?? 'none';
     indentLevel = indentLevel ?? 0;
-    addDecorativeComma = addDecorativeComma ?? 'never';
     const out = [];
     const expand = array.length > 1
         && (indentTarget === 'all' || indentTarget === 'array' || indentTarget === 'arrayInObjectAndThis')
@@ -18,10 +18,10 @@ function stringifyArrayWithComment(array, { addDecorativeComma, addDecorativeSpa
         let string;
         if (nextString === undefined) {
             string = stringifyWithComment(value, {
-                indentTarget,
-                indentLevel: nextIndentLevel,
                 addDecorativeComma,
                 addDecorativeSpace,
+                indentTarget,
+                indentLevel: nextIndentLevel,
                 useUnquotedString,
             });
         }
@@ -30,10 +30,10 @@ function stringifyArrayWithComment(array, { addDecorativeComma, addDecorativeSpa
         }
         if (i !== array.length - 1) {
             nextString = stringifyWithComment(array[i + 1].value, {
-                indentTarget,
-                indentLevel: nextIndentLevel,
                 addDecorativeComma,
                 addDecorativeSpace,
+                indentTarget,
+                indentLevel: nextIndentLevel,
                 useUnquotedString,
             });
         }
@@ -63,9 +63,9 @@ function stringifyArrayWithComment(array, { addDecorativeComma, addDecorativeSpa
     return `[${out.join('')}]`;
 }
 function stringifyObjectWithComment(object, { addDecorativeComma, addDecorativeSpace, indentLevel, indentTarget, useUnquotedString }) {
+    addDecorativeComma = addDecorativeComma ?? 'never';
     indentTarget = indentTarget ?? 'none';
     indentLevel = indentLevel ?? 0;
-    addDecorativeComma = addDecorativeComma ?? 'never';
     const out = [];
     const keys = Object.keys(object);
     let expand = keys.length > 1 && (indentTarget === 'all' || indentTarget === 'object');
@@ -99,10 +99,10 @@ function stringifyObjectWithComment(object, { addDecorativeComma, addDecorativeS
         }
         const { value, comment } = valueWithComment;
         const string = stringifyWithComment(value, {
-            indentTarget,
-            indentLevel: nextIndentLevel,
             addDecorativeComma,
             addDecorativeSpace,
+            indentTarget,
+            indentLevel: nextIndentLevel,
             useUnquotedString: key === '__' && (typeof value === 'string') ? undefined : useUnquotedString,
         });
         if (comment.length > 0) {

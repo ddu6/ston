@@ -2,9 +2,9 @@ import {stringifyString} from './string'
 import type {STONArrayWithIndexValue, STONObjectWithIndexValue, STONWithIndexValue} from './parse-with-index'
 import type {BeautifyOptions} from './stringify'
 function stringifyArrayWithComment(array: STONArrayWithIndexValue, {addDecorativeComma, addDecorativeSpace, indentLevel, indentTarget, useUnquotedString}: BeautifyOptions) {
+    addDecorativeComma = addDecorativeComma ?? 'never'
     indentTarget = indentTarget ?? 'none'
     indentLevel = indentLevel ?? 0
-    addDecorativeComma = addDecorativeComma ?? 'never'
     const out: string[] = []
     const expand = array.length > 1
         && (indentTarget === 'all' || indentTarget === 'array' || indentTarget === 'arrayInObjectAndThis')
@@ -20,10 +20,10 @@ function stringifyArrayWithComment(array: STONArrayWithIndexValue, {addDecorativ
         let string: string
         if (nextString === undefined) {
             string = stringifyWithComment(value, {
-                indentTarget,
-                indentLevel: nextIndentLevel,
                 addDecorativeComma,
                 addDecorativeSpace,
+                indentTarget,
+                indentLevel: nextIndentLevel,
                 useUnquotedString,
             })
         } else {
@@ -31,10 +31,10 @@ function stringifyArrayWithComment(array: STONArrayWithIndexValue, {addDecorativ
         }
         if (i !== array.length - 1) {
             nextString = stringifyWithComment(array[i + 1].value, {
-                indentTarget,
-                indentLevel: nextIndentLevel,
                 addDecorativeComma,
                 addDecorativeSpace,
+                indentTarget,
+                indentLevel: nextIndentLevel,
                 useUnquotedString,
             })
         }
@@ -69,9 +69,9 @@ function stringifyArrayWithComment(array: STONArrayWithIndexValue, {addDecorativ
     return `[${out.join('')}]`
 }
 function stringifyObjectWithComment(object: STONObjectWithIndexValue, {addDecorativeComma, addDecorativeSpace, indentLevel, indentTarget, useUnquotedString}: BeautifyOptions) {
+    addDecorativeComma = addDecorativeComma ?? 'never'
     indentTarget = indentTarget ?? 'none'
     indentLevel = indentLevel ?? 0
-    addDecorativeComma = addDecorativeComma ?? 'never'
     const out: string[] = []
     const keys = Object.keys(object)
     let expand = keys.length > 1 && (indentTarget === 'all' || indentTarget === 'object')
@@ -105,10 +105,10 @@ function stringifyObjectWithComment(object: STONObjectWithIndexValue, {addDecora
         }
         const {value, comment} = valueWithComment
         const string = stringifyWithComment(value, {
-            indentTarget,
-            indentLevel: nextIndentLevel,
             addDecorativeComma,
             addDecorativeSpace,
+            indentTarget,
+            indentLevel: nextIndentLevel,
             useUnquotedString: key === '__' && (typeof value === 'string') ? undefined : useUnquotedString,
         })
         if (comment.length > 0) {
