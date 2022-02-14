@@ -6,7 +6,7 @@ function stringifyArrayWithComment(array, { addDecorativeComma, addDecorativeSpa
     const out = [];
     const expand = array.length > 1
         && (indentTarget === 'all' || indentTarget === 'array' || indentTarget === 'arrayInObjectAndThis')
-        || array.find(value => value.comments.length > 0) !== undefined;
+        || array.find(value => value.comment.length > 0) !== undefined;
     const nextIndentLevel = indentLevel + (expand ? 1 : 0);
     if (indentTarget === 'arrayInObjectAndThis') {
         indentTarget = 'arrayInObject';
@@ -15,7 +15,7 @@ function stringifyArrayWithComment(array, { addDecorativeComma, addDecorativeSpa
     let nextString;
     for (let i = 0; i < array.length; i++) {
         const valueWithComment = array[i];
-        const { comments } = valueWithComment;
+        const { comment } = valueWithComment;
         let string;
         if (nextString === undefined) {
             string = stringifyWithComment(valueWithComment, {
@@ -41,8 +41,8 @@ function stringifyArrayWithComment(array, { addDecorativeComma, addDecorativeSpa
         if (expand || i === array.length - 1
             || addDecorativeComma !== 'always' && (string.endsWith("'") || string.endsWith('}') || string.endsWith(']')
                 || nextString !== undefined && (nextString.endsWith("'") || nextString.endsWith('}') || nextString.endsWith(']')))) {
-            if (comments.length > 0) {
-                out.push(...comments);
+            if (comment.length > 0) {
+                out.push(...comment);
             }
             out.push(string);
         }
@@ -76,7 +76,7 @@ function stringifyObjectWithComment(object, { addDecorativeComma, addDecorativeS
             if (value === undefined) {
                 continue;
             }
-            if (value.comments.length > 0) {
+            if (value.comment.length > 0) {
                 expand = true;
                 break;
             }
@@ -98,7 +98,7 @@ function stringifyObjectWithComment(object, { addDecorativeComma, addDecorativeS
         if (valueWithComment === undefined) {
             continue;
         }
-        const { value, comments } = valueWithComment;
+        const { value, comment } = valueWithComment;
         const string = stringifyWithComment(valueWithComment, {
             addDecorativeComma,
             addDecorativeSpace,
@@ -106,8 +106,8 @@ function stringifyObjectWithComment(object, { addDecorativeComma, addDecorativeS
             indentLevel: nextIndentLevel,
             useUnquotedString: key === '__' && (typeof value === 'string') ? undefined : useUnquotedString
         });
-        if (comments.length > 0) {
-            out.push(...comments);
+        if (comment.length > 0) {
+            out.push(...comment);
         }
         if (string.startsWith("'") || string.startsWith('[') || string.startsWith('{')) {
             if (expand || i === keys.length - 1 || addDecorativeComma !== 'always' && addDecorativeComma !== 'inObject') {
