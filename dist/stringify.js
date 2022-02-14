@@ -19,7 +19,7 @@ function stringifyArray(array, { addDecorativeComma, addDecorativeSpace, indentL
                 addDecorativeSpace,
                 indentTarget,
                 indentLevel: nextIndentLevel,
-                useUnquotedString,
+                useUnquotedString
             });
         }
         else {
@@ -31,7 +31,7 @@ function stringifyArray(array, { addDecorativeComma, addDecorativeSpace, indentL
                 addDecorativeSpace,
                 indentTarget,
                 indentLevel: nextIndentLevel,
-                useUnquotedString,
+                useUnquotedString
             });
         }
         if (expand || i === array.length - 1
@@ -84,7 +84,7 @@ function stringifyObject(object, { addDecorativeComma, addDecorativeSpace, inden
             addDecorativeSpace,
             indentTarget,
             indentLevel: nextIndentLevel,
-            useUnquotedString: key === '__' && (typeof value === 'string') ? undefined : useUnquotedString,
+            useUnquotedString: key === '__' && (typeof value === 'string') ? undefined : useUnquotedString
         });
         if (string.startsWith("'") || string.startsWith('[') || string.startsWith('{')) {
             if (expand || i === keys.length - 1 || addDecorativeComma !== 'always' && addDecorativeComma !== 'inObject') {

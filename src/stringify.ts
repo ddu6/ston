@@ -27,7 +27,7 @@ function stringifyArray(array: STONArray, {addDecorativeComma, addDecorativeSpac
                 addDecorativeSpace,
                 indentTarget,
                 indentLevel: nextIndentLevel,
-                useUnquotedString,
+                useUnquotedString
             })
         } else {
             string = nextString
@@ -38,7 +38,7 @@ function stringifyArray(array: STONArray, {addDecorativeComma, addDecorativeSpac
                 addDecorativeSpace,
                 indentTarget,
                 indentLevel: nextIndentLevel,
-                useUnquotedString,
+                useUnquotedString
             })
         }
         if (
@@ -96,7 +96,7 @@ function stringifyObject(object: STONObject, {addDecorativeComma, addDecorativeS
             addDecorativeSpace,
             indentTarget,
             indentLevel: nextIndentLevel,
-            useUnquotedString: key === '__' && (typeof value === 'string') ? undefined : useUnquotedString,
+            useUnquotedString: key === '__' && (typeof value === 'string') ? undefined : useUnquotedString
         })
         if (string.startsWith("'") || string.startsWith('[') || string.startsWith('{')) {
             if (expand || i === keys.length - 1 || addDecorativeComma !== 'always' && addDecorativeComma !== 'inObject') {

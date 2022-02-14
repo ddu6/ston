@@ -110,7 +110,7 @@ function stringifyObjectWithComment(object: STONObjectWithIndexValue, {addDecora
             addDecorativeSpace,
             indentTarget,
             indentLevel: nextIndentLevel,
-            useUnquotedString: key === '__' && (typeof value === 'string') ? undefined : useUnquotedString,
+            useUnquotedString: key === '__' && (typeof value === 'string') ? undefined : useUnquotedString
         })
         if (comment.length > 0) {
             out.push(...comment.split('\n'))
