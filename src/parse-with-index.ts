@@ -7,7 +7,7 @@ export type STONWithIndexValue = STONObjectWithIndexValue | STONArrayWithIndexVa
 export interface STONWithIndex<T extends STONWithIndexValue> {
     value: T
     index: number
-    comment: string
+    comments: string[]
 }
 function splitToTmpArrayWithIndex(string: string, index: number, keepKey = false) {
     let count = 0
@@ -37,7 +37,7 @@ function splitToTmpArrayWithIndex(string: string, index: number, keepKey = false
                 if (next === '/') {
                     i++
                     commentType = false
-                    comments.push(string.slice(last, i + 1).replace(/\n[ ]*/g, '\n '))
+                    comments.push(...string.slice(last, i + 1).replace(/\n[ ]*/g, '\n ').split('\n'))
                     last = i + 1
                 }
             }
@@ -52,7 +52,7 @@ function splitToTmpArrayWithIndex(string: string, index: number, keepKey = false
                         array.push({
                             value: tmp,
                             index: index + last,
-                            comment: comments.join('\n')
+                            comments
                         })
                         comments = []
                     }
@@ -65,7 +65,7 @@ function splitToTmpArrayWithIndex(string: string, index: number, keepKey = false
                 array.push({
                     value: string.slice(last, i + 1),
                     index: index + last,
-                    comment: comments.join('\n')
+                    comments
                 })
                 comments = []
                 last = i + 1
@@ -86,7 +86,7 @@ function splitToTmpArrayWithIndex(string: string, index: number, keepKey = false
                     array.push({
                         value: tmp,
                         index: index + last,
-                        comment: comments.join('\n')
+                        comments
                     })
                     comments = []
                 }
@@ -102,7 +102,7 @@ function splitToTmpArrayWithIndex(string: string, index: number, keepKey = false
                     array.push({
                         value: tmp,
                         index: index + last,
-                        comment: comments.join('\n')
+                        comments
                     })
                     comments = []
                 }
@@ -112,7 +112,7 @@ function splitToTmpArrayWithIndex(string: string, index: number, keepKey = false
                 array.push({
                     value: string.slice(last, i + 1),
                     index: index + last,
-                    comment: comments.join('\n')
+                    comments
                 })
                 comments = []
                 last = i + 1
@@ -128,7 +128,7 @@ function splitToTmpArrayWithIndex(string: string, index: number, keepKey = false
                 array.push({
                     value: tmp,
                     index: index + last,
-                    comment: comments.join('\n')
+                    comments
                 })
                 comments = []
             }
@@ -164,7 +164,7 @@ function splitToTmpArrayWithIndex(string: string, index: number, keepKey = false
             array.push({
                 value: tmp,
                 index: index + last,
-                comment: comments.join('\n')
+                comments
             })
         }
     }
@@ -172,8 +172,8 @@ function splitToTmpArrayWithIndex(string: string, index: number, keepKey = false
 }
 function parseToArrayWithIndexValue(string: string, index: number) {
     const out: STONArrayWithIndexValue = []
-    for (const {value, index: subIndex, comment} of splitToTmpArrayWithIndex(string, index)) {
-        const ston = parseWithIndex(value, subIndex, comment)
+    for (const {value, index: subIndex, comments} of splitToTmpArrayWithIndex(string, index)) {
+        const ston = parseWithIndex(value, subIndex, comments)
         if (ston === undefined) {
             return undefined
         }
@@ -183,10 +183,10 @@ function parseToArrayWithIndexValue(string: string, index: number) {
 }
 function parseToObjectWithIndexValue(string: string, index: number) {
     const out: STONObjectWithIndexValue = {}
-    for (const {value, index: subIndex, comment} of splitToTmpArrayWithIndex(string, index, true)) {
+    for (const {value, index: subIndex, comments} of splitToTmpArrayWithIndex(string, index, true)) {
         const result = value.match(/^\s*([\w-]+)/)
         if (result === null) {
-            const ston = parseWithIndex(value, subIndex, comment)
+            const ston = parseWithIndex(value, subIndex, comments)
             if (ston === undefined) {
                 return undefined
             }
@@ -200,10 +200,10 @@ function parseToObjectWithIndexValue(string: string, index: number) {
             out[key] = {
                 value: true,
                 index: subIndex + length,
-                comment
+                comments
             }
         } else {
-            const value = parseWithIndex(valueString, subIndex + length, comment)
+            const value = parseWithIndex(valueString, subIndex + length, comments)
             if (value === undefined) {
                 return undefined
             }
@@ -241,7 +241,7 @@ function parseToWithIndexValue(string: string, index: number): STONWithIndexValu
     }
     return string
 }
-export function parseWithIndex(string: string, index = 0, comment = ''): STONWithIndex<STONWithIndexValue> | undefined {
+export function parseWithIndex(string: string, index = 0, comments: string[] = []): STONWithIndex<STONWithIndexValue> | undefined {
     index += string.length
     string = string.trimStart()
     index -= string.length
@@ -252,6 +252,6 @@ export function parseWithIndex(string: string, index = 0, comment = ''): STONWit
     return {
         value: value,
         index,
-        comment
+        comments
     }
 }

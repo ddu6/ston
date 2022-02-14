@@ -8,7 +8,7 @@ function stringifyArrayWithComment(array: STONArrayWithIndexValue, {addDecorativ
     const out: string[] = []
     const expand = array.length > 1
         && (indentTarget === 'all' || indentTarget === 'array' || indentTarget === 'arrayInObjectAndThis')
-        || array.find(value => value.comment.length > 0) !== undefined
+        || array.find(value => value.comments.length > 0) !== undefined
     const nextIndentLevel = indentLevel + (expand ? 1 : 0)
     if (indentTarget === 'arrayInObjectAndThis') {
         indentTarget = 'arrayInObject'
@@ -17,7 +17,7 @@ function stringifyArrayWithComment(array: STONArrayWithIndexValue, {addDecorativ
     let nextString: string | undefined
     for (let i = 0; i < array.length; i++) {
         const valueWithComment = array[i]
-        const {comment} = valueWithComment
+        const {comments} = valueWithComment
         let string: string
         if (nextString === undefined) {
             string = stringifyWithComment(valueWithComment, {
@@ -48,8 +48,8 @@ function stringifyArrayWithComment(array: STONArrayWithIndexValue, {addDecorativ
                 )
             )
         ) {
-            if (comment.length > 0) {
-                out.push(...comment.split('\n'))
+            if (comments.length > 0) {
+                out.push(...comments)
             }
             out.push(string)
         } else {
@@ -82,7 +82,7 @@ function stringifyObjectWithComment(object: STONObjectWithIndexValue, {addDecora
             if (value === undefined) {
                 continue
             }
-            if (value.comment.length > 0) {
+            if (value.comments.length > 0) {
                 expand = true
                 break
             }
@@ -104,7 +104,7 @@ function stringifyObjectWithComment(object: STONObjectWithIndexValue, {addDecora
         if (valueWithComment === undefined) {
             continue
         }
-        const {value, comment} = valueWithComment
+        const {value, comments} = valueWithComment
         const string = stringifyWithComment(valueWithComment, {
             addDecorativeComma,
             addDecorativeSpace,
@@ -112,8 +112,8 @@ function stringifyObjectWithComment(object: STONObjectWithIndexValue, {addDecora
             indentLevel: nextIndentLevel,
             useUnquotedString: key === '__' && (typeof value === 'string') ? undefined : useUnquotedString
         })
-        if (comment.length > 0) {
-            out.push(...comment.split('\n'))
+        if (comments.length > 0) {
+            out.push(...comments)
         }
         if (string.startsWith("'") || string.startsWith('[') || string.startsWith('{')) {
             if (expand || i === keys.length - 1 || addDecorativeComma !== 'always' && addDecorativeComma !== 'inObject') {

@@ -6,6 +6,6 @@ export declare type STONWithIndexValue = STONObjectWithIndexValue | STONArrayWit
 export interface STONWithIndex<T extends STONWithIndexValue> {
     value: T;
     index: number;
-    comment: string;
+    comments: string[];
 }
-export declare function parseWithIndex(string: string, index?: number, comment?: string): STONWithIndex<STONWithIndexValue> | undefined;
+export declare function parseWithIndex(string: string, index?: number, comments?: string[]): STONWithIndex<STONWithIndexValue> | undefined;
