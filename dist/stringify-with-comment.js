@@ -1,8 +1,8 @@
 import { stringifyString } from './string';
 function stringifyArrayWithComment(array, { addDecorativeComma, addDecorativeSpace, indentLevel, indentTarget, useUnquotedString }) {
-    addDecorativeComma = addDecorativeComma ?? 'never';
-    indentTarget = indentTarget ?? 'none';
-    indentLevel = indentLevel ?? 0;
+    addDecorativeComma = addDecorativeComma !== null && addDecorativeComma !== void 0 ? addDecorativeComma : 'never';
+    indentTarget = indentTarget !== null && indentTarget !== void 0 ? indentTarget : 'none';
+    indentLevel = indentLevel !== null && indentLevel !== void 0 ? indentLevel : 0;
     const out = [];
     const expand = array.length > 1
         && (indentTarget === 'all' || indentTarget === 'array' || indentTarget === 'arrayInObjectAndThis')
@@ -64,9 +64,9 @@ function stringifyArrayWithComment(array, { addDecorativeComma, addDecorativeSpa
     return `[${out.join('')}]`;
 }
 function stringifyObjectWithComment(object, { addDecorativeComma, addDecorativeSpace, indentLevel, indentTarget, useUnquotedString }) {
-    addDecorativeComma = addDecorativeComma ?? 'never';
-    indentTarget = indentTarget ?? 'none';
-    indentLevel = indentLevel ?? 0;
+    addDecorativeComma = addDecorativeComma !== null && addDecorativeComma !== void 0 ? addDecorativeComma : 'never';
+    indentTarget = indentTarget !== null && indentTarget !== void 0 ? indentTarget : 'none';
+    indentLevel = indentLevel !== null && indentLevel !== void 0 ? indentLevel : 0;
     const out = [];
     const keys = Object.keys(object);
     let expand = keys.length > 1 && (indentTarget === 'all' || indentTarget === 'object');
